@@ -38,7 +38,7 @@ fun PantallaIniciarSesion(
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Logo Placeholder
+            /* Espacio del logo */
             Surface(
                 modifier = Modifier
                     .size(100.dp)
@@ -58,7 +58,7 @@ fun PantallaIniciarSesion(
                 }
             }
 
-            // Título
+            /* Título */
             Text(
                 text = "Iniciar Sesión",
                 style = MaterialTheme.typography.titleLarge,
@@ -67,7 +67,7 @@ fun PantallaIniciarSesion(
             )
 
             // Formulario
-            // Email
+            /* Email */
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -81,7 +81,7 @@ fun PantallaIniciarSesion(
                 )
             )
 
-            // Contraseña
+            /* Contraseña */
             OutlinedTextField(
                 value = contrasenna,
                 onValueChange = { contrasenna = it },
@@ -96,7 +96,7 @@ fun PantallaIniciarSesion(
                 )
             )
 
-            // Checkbox de Recordarme y Olvidé la contraseña
+            /* Checkbox de Recordarme y Olvidé la contraseña */
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -131,7 +131,7 @@ fun PantallaIniciarSesion(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de Iniciar Sesión
+            /* Botón de Iniciar Sesión */
             Button(
                 onClick = onIniciarSesionClick,
                 modifier = Modifier
@@ -151,7 +151,7 @@ fun PantallaIniciarSesion(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Crear nuevo usuario
+            /* Crear nuevo usuario */
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,

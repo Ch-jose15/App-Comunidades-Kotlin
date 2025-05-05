@@ -117,6 +117,17 @@ fun NavegacionAppComunidaeds(
             )
         }
 
+        /* Definición de Registro */
+        composable(RutasNavegacion.Registro.name) {
+            PantallaRegistro(
+                onVolverClick = accionesNavegacion.volver,
+                onRegistrarseClick = {
+                    // Implementar la lógica para guardar el usuario en Firebase
+                    accionesNavegacion.navegarAPrincipal()
+                }
+            )
+        }
+
         /* Definición de CrearComunidad */
         composable(RutasNavegacion.CrearComunidad.name) {
             PantallaCrearComunidad(
