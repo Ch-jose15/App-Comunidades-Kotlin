@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "828549857821",
+    "project_id": "tfg-comunidades",
+    "storage_bucket": "tfg-comunidades.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828549857821:android:b93db9347339b24846fcf4",
+        "android_client_info": {
+          "package_name": "com.example.appcomunidades"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhW7kEROMohAaIzxRjKgV9qH4aTxF8SSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
