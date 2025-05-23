@@ -1,4 +1,4 @@
-package com.example.appcomunidades
+package com.example.appcomunidades.principal
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

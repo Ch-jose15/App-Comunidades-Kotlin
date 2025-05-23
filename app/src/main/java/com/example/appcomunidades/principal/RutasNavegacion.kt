@@ -1,4 +1,4 @@
-package com.example.appcomunidades
+package com.example.appcomunidades.principal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -6,6 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.appcomunidades.pantallas.PantallaCrearComunidad
+import com.example.appcomunidades.pantallas.PantallaIniciarSesion
+import com.example.appcomunidades.pantallas.PantallaInicio
+import com.example.appcomunidades.pantallas.PantallaRegistro
+import com.example.appcomunidades.pantallas.PantallaPrincipal
+
+/* RUTAS DE NAVEGACIÓN */
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -17,7 +24,8 @@ enum class RutasNavegacion {
     Registro,
     RecuperarContrasenna,
     Principal,
-    CrearComunidad;
+    CrearComunidad,
+    PantallaPrincipal;
 
     companion object {
         fun fromRoute(ruta: String?): RutasNavegacion =
@@ -28,6 +36,7 @@ enum class RutasNavegacion {
                 RecuperarContrasenna.name -> RecuperarContrasenna
                 Principal.name -> Principal
                 CrearComunidad.name -> CrearComunidad
+                PantallaPrincipal.name -> PantallaPrincipal
                 null -> Inicio
                 else -> throw IllegalArgumentException("Ruta $ruta no reconocida" )
             }
@@ -113,7 +122,8 @@ fun NavegacionAppComunidaeds(
             PantallaIniciarSesion(
                 onIniciarSesionClick = accionesNavegacion.navegarAPrincipal,
                 onCrearCuentaClick = accionesNavegacion.navegarARegistro,
-                onOlvideContrasennaClick = accionesNavegacion.navegarARecuperarContrasenna
+                onOlvideContrasennaClick = accionesNavegacion.navegarARecuperarContrasenna,
+                onVolverClick = accionesNavegacion.volver
             )
         }
 
@@ -137,6 +147,11 @@ fun NavegacionAppComunidaeds(
                     accionesNavegacion.navegarAPrincipal()
                 }
             )
+        }
+
+        /* Definición de Principal */
+        composable(RutasNavegacion.Principal.name) {
+            PantallaPrincipal()
         }
     }
 }
