@@ -6,7 +6,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.appcomunidades.pantallas.PantallaCrearComunidad
 import com.example.appcomunidades.pantallas.PantallaIniciarSesion
 import com.example.appcomunidades.pantallas.PantallaInicio
 import com.example.appcomunidades.pantallas.PantallaRegistro
@@ -24,7 +23,6 @@ enum class RutasNavegacion {
     Registro,
     RecuperarContrasenna,
     Principal,
-    CrearComunidad,
     PantallaPrincipal;
 
     companion object {
@@ -35,7 +33,6 @@ enum class RutasNavegacion {
                 Registro.name -> Registro
                 RecuperarContrasenna.name -> RecuperarContrasenna
                 Principal.name -> Principal
-                CrearComunidad.name -> CrearComunidad
                 PantallaPrincipal.name -> PantallaPrincipal
                 null -> Inicio
                 else -> throw IllegalArgumentException("Ruta $ruta no reconocida" )
@@ -83,11 +80,6 @@ class AccionesDeNavegacion(private val navController : NavHostController) {
             popUpTo(RutasNavegacion.Inicio.name) { inclusive = true }
         }
     }
-
-    /* Navegación a la pantalla de crear comunidad */
-    val navegarACrearComunidad: () -> Unit = {
-        navController.navigate(RutasNavegacion.CrearComunidad.name)
-    }
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -112,8 +104,7 @@ fun NavegacionAppComunidaeds(
         composable(RutasNavegacion.Inicio.name) {
             PantallaInicio(
                 onIniciarSesionClick = accionesNavegacion.navegarAIniciarSesion,
-                onRegistrarseClick = accionesNavegacion.navegarARegistro,
-                onCrearComunidadClick = accionesNavegacion.navegarACrearComunidad
+                onRegistrarseClick = accionesNavegacion.navegarARegistro
             )
         }
 
@@ -133,17 +124,6 @@ fun NavegacionAppComunidaeds(
                 onVolverClick = accionesNavegacion.volver,
                 onRegistrarseClick = {
                     // Implementar la lógica para guardar el usuario en Firebase
-                    accionesNavegacion.navegarAPrincipal()
-                }
-            )
-        }
-
-        /* Definición de CrearComunidad */
-        composable(RutasNavegacion.CrearComunidad.name) {
-            PantallaCrearComunidad(
-                onVolverClick = accionesNavegacion.volver,
-                onCrearComunidadClick = {
-                    // Implementar la lógica para guardar la comunidad en Firebase
                     accionesNavegacion.navegarAPrincipal()
                 }
             )

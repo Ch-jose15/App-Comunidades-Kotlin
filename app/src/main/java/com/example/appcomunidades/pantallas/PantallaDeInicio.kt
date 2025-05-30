@@ -1,5 +1,6 @@
 package com.example.appcomunidades.pantallas
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,55 +10,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appcomunidades.R
 import com.example.appcomunidades.ui.theme.*
 
-/* PANTALLA DE INICIO MODERNIZADA */
+/* PANTALLA DE INICIO - LOGIN */
 
 @Composable
-fun TituloHabitatDigitalInicio(
+fun LogoApp(
     modificador: Modifier = Modifier
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modificador
-    ) {
-        Text(
-            text = "Habitat",
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
-            color = ColorPrimario,
-            letterSpacing = 3.sp
-        )
-        Text(
-            text = "DIGITAL",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Light,
-            color = ColorSecundario,
-            letterSpacing = 6.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Gestión inteligente de comunidades",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            color = ColorPrimarioVariante,
-            textAlign = TextAlign.Center,
-            letterSpacing = 1.sp
-        )
-    }
+    // Placeholder para el logo - reemplazar con tu imagen real
+    Image(
+         painter = painterResource(id = R.drawable.logo_app),
+         contentDescription = "Logo Habitat Digital",
+         modifier = modificador.size(400.dp),
+         contentScale = ContentScale.Fit
+    )
 }
 
 @Composable
 fun BotonPrimarioInicio(
     texto: String,
     onClick: () -> Unit,
-    modificador: Modifier = Modifier,
-    colorFondo: Color = ColorPrimario
+    modificador: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
@@ -65,7 +46,7 @@ fun BotonPrimarioInicio(
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorFondo,
+            containerColor = ColorPrimario,
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(12.dp),
@@ -77,7 +58,8 @@ fun BotonPrimarioInicio(
         Text(
             text = texto,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.sp
         )
     }
 }
@@ -95,7 +77,7 @@ fun BotonSecundarioInicio(
             .height(56.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = ColorPrimario,
-            containerColor = Color.White
+            containerColor = Color.Transparent
         ),
         border = androidx.compose.foundation.BorderStroke(
             width = 2.dp,
@@ -106,7 +88,8 @@ fun BotonSecundarioInicio(
         Text(
             text = texto,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.sp
         )
     }
 }
@@ -124,17 +107,58 @@ fun CopyrightTexto(
 }
 
 @Composable
+fun ContenedorBotones(
+    onIniciarSesionClick: () -> Unit,
+    onRegistrarseClick: () -> Unit,
+    modificador: Modifier = Modifier
+) {
+    Card(
+        modifier = modificador.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Botón de inicio de sesión
+            BotonPrimarioInicio(
+                texto = "Iniciar Sesión",
+                onClick = onIniciarSesionClick
+            )
+
+            // Botón de registro
+            BotonSecundarioInicio(
+                texto = "Crear Cuenta",
+                onClick = onRegistrarseClick
+            )
+        }
+    }
+}
+
+/* PANTALLA DE INICIO SIMPLIFICADA */
+
+@Composable
 fun PantallaInicio(
     onIniciarSesionClick: () -> Unit = {},
-    onRegistrarseClick: () -> Unit = {},
-    onCrearComunidadClick: () -> Unit = {}
+    onRegistrarseClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(ColorFondo, ColorFondoSecundario.copy(alpha = 0.5f)),
+                    colors = listOf(
+                        ColorFondo,
+                        ColorFondoSecundario.copy(alpha = 0.3f)
+                    ),
                     startY = 0f,
                     endY = 1000f
                 )
@@ -143,93 +167,33 @@ fun PantallaInicio(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(0.5f))
 
-            // Título principal
-            TituloHabitatDigitalInicio(
-                modificador = Modifier.padding(bottom = 64.dp)
+            // Logo de la aplicación
+            LogoApp()
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            //Spacer(modifier = Modifier.weight(1f))
+
+            // Contenedor con botones
+            ContenedorBotones(
+                onIniciarSesionClick = onIniciarSesionClick,
+                onRegistrarseClick = onRegistrarseClick
             )
-
-            // Card con los botones
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.95f)
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 12.dp
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Acceso al Sistema",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = ColorTexto,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-
-                    // Botón de inicio de sesión
-                    BotonPrimarioInicio(
-                        texto = "Iniciar Sesión",
-                        onClick = onIniciarSesionClick
-                    )
-
-                    // Botón de registro
-                    BotonSecundarioInicio(
-                        texto = "Registrarse",
-                        onClick = onRegistrarseClick
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Divider
-                    HorizontalDivider(
-                        color = ColorPrimarioVariante.copy(alpha = 0.3f),
-                        thickness = 1.dp
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Administración",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = ColorSecundario,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    // Botón de crear comunidad
-                    BotonPrimarioInicio(
-                        texto = "Crear Nueva Comunidad",
-                        onClick = onCrearComunidadClick,
-                        colorFondo = ColorSecundario
-                    )
-                }
-            }
 
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        // Copyright en la esquina inferior derecha
+        // Copyright en la parte inferior
         CopyrightTexto(
             modificador = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
         )
     }
 }

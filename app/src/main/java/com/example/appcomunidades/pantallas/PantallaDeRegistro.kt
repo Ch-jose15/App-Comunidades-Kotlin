@@ -1,5 +1,6 @@
 package com.example.appcomunidades.pantallas
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,13 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,6 +84,7 @@ fun CampoDeTextoPersonalizado(
     tipoTeclado: KeyboardType = KeyboardType.Text,
     esContrasenna: Boolean = false,
     mensajeError: String? = null,
+    esObligatorio: Boolean = false,
     modificador: Modifier = Modifier
 ) {
     var mostrarContrasenna by remember { mutableStateOf(false) }
@@ -96,7 +93,17 @@ fun CampoDeTextoPersonalizado(
         OutlinedTextField(
             value = valor,
             onValueChange = alCambiarValor,
-            label = { Text(etiqueta) },
+            label = {
+                Row {
+                    Text(etiqueta)
+                    if (esObligatorio) {
+                        Text(
+                            text = " *",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
             leadingIcon = {
                 Icon(
                     imageVector = icono,
@@ -162,42 +169,93 @@ fun SelectorAdministrador(
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = if (esAdmin) ColorPrimario.copy(alpha = 0.1f) else Color.White
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = if (esAdmin) ColorPrimario else ColorPrimarioVariante.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (esAdmin) Icons.Default.AccountCircle else Icons.Default.Person,
+                        contentDescription = "Rol",
+                        tint = if (esAdmin) ColorPrimario else ColorSecundario,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = if (esAdmin) "Administrador" else "Vecino",
+                            color = ColorTexto,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = if (esAdmin) "Crear nueva comunidad" else "Unirse a comunidad existente",
+                            color = ColorSecundario,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                Switch(
+                    checked = esAdmin,
+                    onCheckedChange = alCambiar,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorPrimario,
+                        uncheckedThumbColor = ColorFondoSecundario,
+                        uncheckedTrackColor = ColorFondoSecundario.copy(alpha = 0.5f)
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NotaInformativa(
+    texto: String,
+    modificador: Modifier = Modifier
+) {
+    Card(
+        modifier = modificador.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = ColorPrimario.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(12.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Administrador",
-                    tint = if (esAdmin) ColorPrimario else ColorFondoSecundario,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Rol de administrador",
-                    color = if (esAdmin) ColorPrimario else ColorSecundario
-                )
-            }
-
-            Switch(
-                checked = esAdmin,
-                onCheckedChange = alCambiar,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = ColorPrimario,
-                    uncheckedThumbColor = ColorFondoSecundario,
-                    uncheckedTrackColor = ColorFondoSecundario.copy(alpha = 0.5f)
-                )
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Información",
+                tint = ColorPrimario,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = texto,
+                color = ColorSecundario,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
             )
         }
     }
@@ -276,14 +334,14 @@ fun DialogoExito(
             title = {
                 Text(
                     text = "¡Cuenta creada con éxito!",
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     color = ColorTexto
                 )
             },
             text = {
                 Text(
                     text = "Tu cuenta ha sido registrada correctamente. Ya puedes iniciar sesión en la aplicación.",
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     color = ColorSecundario
                 )
             },
@@ -326,14 +384,14 @@ fun DialogoError(
             title = {
                 Text(
                     text = "Error en el registro",
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.error
                 )
             },
             text = {
                 Text(
                     text = mensaje,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     color = ColorSecundario
                 )
             },
@@ -379,13 +437,6 @@ fun PantallaRegistro(
     // Estados locales para UI
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
-
-    // Manejar navegación después del éxito
-    LaunchedEffect(estadoRegistro) {
-        if (estadoRegistro is EstadoRegistro.Exito) {
-            // Auto-navegación después de un breve delay para mostrar el diálogo
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -456,14 +507,15 @@ fun PantallaRegistro(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 10.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
 
                         CampoDeTextoPersonalizado(
                             valor = nombre,
                             alCambiarValor = viewModel::actualizarNombre,
                             etiqueta = "Nombre completo",
-                            icono = Icons.Default.Person
+                            icono = Icons.Default.Person,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -471,7 +523,8 @@ fun PantallaRegistro(
                             alCambiarValor = viewModel::actualizarEmail,
                             etiqueta = "Email",
                             icono = Icons.Default.Email,
-                            tipoTeclado = KeyboardType.Email
+                            tipoTeclado = KeyboardType.Email,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -480,7 +533,8 @@ fun PantallaRegistro(
                             etiqueta = "Contraseña",
                             icono = Icons.Default.Lock,
                             tipoTeclado = KeyboardType.Password,
-                            esContrasenna = true
+                            esContrasenna = true,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -490,6 +544,7 @@ fun PantallaRegistro(
                             icono = Icons.Default.Lock,
                             tipoTeclado = KeyboardType.Password,
                             esContrasenna = true,
+                            esObligatorio = true,
                             mensajeError = viewModel.obtenerMensajeErrorContrasenna()
                         )
 
@@ -498,35 +553,69 @@ fun PantallaRegistro(
                             alCambiarValor = viewModel::actualizarTelefono,
                             etiqueta = "Teléfono",
                             icono = Icons.Default.Phone,
-                            tipoTeclado = KeyboardType.Phone
+                            tipoTeclado = KeyboardType.Phone,
+                            esObligatorio = true
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Información de Comunidad",
+                            text = "Tipo de Cuenta",
                             color = ColorTexto,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
-
-                        CampoDeTextoPersonalizado(
-                            valor = idComunidad,
-                            alCambiarValor = viewModel::actualizarIdComunidad,
-                            etiqueta = "ID de Comunidad (opcional)",
-                            icono = Icons.Outlined.Home
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
 
                         SelectorAdministrador(
                             esAdmin = esAdministrador,
                             alCambiar = viewModel::actualizarEsAdministrador
                         )
+
+                        // Campo ID Comunidad con animación
+                        AnimatedVisibility(
+                            visible = !esAdministrador,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                CampoDeTextoPersonalizado(
+                                    valor = idComunidad,
+                                    alCambiarValor = viewModel::actualizarIdComunidad,
+                                    etiqueta = "ID de Comunidad",
+                                    icono = Icons.Outlined.Home,
+                                    esObligatorio = true,
+                                    mensajeError = if (!esAdministrador && idComunidad.isEmpty() && estadoRegistro is EstadoRegistro.Error)
+                                        "El ID de comunidad es obligatorio para vecinos"
+                                    else null
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                NotaInformativa(
+                                    texto = "Solicita el ID de comunidad a tu administrador. Formato: Cs0000001a"
+                                )
+                            }
+                        }
+
+                        // Nota para administradores
+                        AnimatedVisibility(
+                            visible = esAdministrador,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                NotaInformativa(
+                                    texto = "Como administrador, crearás una nueva comunidad al registrarte. Se generará un ID único automáticamente."
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -576,7 +665,6 @@ fun PantallaRegistroPreview() {
             modifier = Modifier.fillMaxSize(),
             color = ColorFondo
         ) {
-            // Preview sin ViewModel para evitar errores
             PantallaRegistroSinViewModel()
         }
     }
@@ -585,7 +673,6 @@ fun PantallaRegistroPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PantallaRegistroSinViewModel() {
-    // Estados locales para el preview
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var contrasenna by remember { mutableStateOf("") }
@@ -661,14 +748,15 @@ private fun PantallaRegistroSinViewModel() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 10.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
 
                         CampoDeTextoPersonalizado(
                             valor = nombre,
                             alCambiarValor = { nombre = it },
                             etiqueta = "Nombre completo",
-                            icono = Icons.Default.Person
+                            icono = Icons.Default.Person,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -676,7 +764,8 @@ private fun PantallaRegistroSinViewModel() {
                             alCambiarValor = { email = it },
                             etiqueta = "Email",
                             icono = Icons.Default.Email,
-                            tipoTeclado = KeyboardType.Email
+                            tipoTeclado = KeyboardType.Email,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -685,7 +774,8 @@ private fun PantallaRegistroSinViewModel() {
                             etiqueta = "Contraseña",
                             icono = Icons.Default.Lock,
                             tipoTeclado = KeyboardType.Password,
-                            esContrasenna = true
+                            esContrasenna = true,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -694,7 +784,8 @@ private fun PantallaRegistroSinViewModel() {
                             etiqueta = "Confirmar contraseña",
                             icono = Icons.Default.Lock,
                             tipoTeclado = KeyboardType.Password,
-                            esContrasenna = true
+                            esContrasenna = true,
+                            esObligatorio = true
                         )
 
                         CampoDeTextoPersonalizado(
@@ -702,35 +793,64 @@ private fun PantallaRegistroSinViewModel() {
                             alCambiarValor = { telefono = it },
                             etiqueta = "Teléfono",
                             icono = Icons.Default.Phone,
-                            tipoTeclado = KeyboardType.Phone
+                            tipoTeclado = KeyboardType.Phone,
+                            esObligatorio = true
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Información de Comunidad",
+                            text = "Tipo de Cuenta",
                             color = ColorTexto,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
-
-                        CampoDeTextoPersonalizado(
-                            valor = idComunidad,
-                            alCambiarValor = { idComunidad = it },
-                            etiqueta = "ID de Comunidad (opcional)",
-                            icono = Icons.Outlined.Home
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
 
                         SelectorAdministrador(
                             esAdmin = esAdministrador,
                             alCambiar = { esAdministrador = it }
                         )
+
+                        AnimatedVisibility(
+                            visible = !esAdministrador,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                CampoDeTextoPersonalizado(
+                                    valor = idComunidad,
+                                    alCambiarValor = { idComunidad = it },
+                                    etiqueta = "ID de Comunidad",
+                                    icono = Icons.Outlined.Home,
+                                    esObligatorio = true
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                NotaInformativa(
+                                    texto = "Solicita el ID de comunidad a tu administrador. Formato: Cs0000001a"
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = esAdministrador,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                NotaInformativa(
+                                    texto = "Como administrador, crearás una nueva comunidad al registrarte. Se generará un ID único automáticamente."
+                                )
+                            }
+                        }
                     }
                 }
 
