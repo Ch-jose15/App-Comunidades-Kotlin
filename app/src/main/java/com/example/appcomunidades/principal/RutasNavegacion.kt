@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.appcomunidades.pantallas.PantallaIniciarSesion
 import com.example.appcomunidades.pantallas.PantallaInicio
 import com.example.appcomunidades.pantallas.PantallaRegistro
+import com.example.appcomunidades.pantallas.PantallaRecuperarContrasenna
 import com.example.appcomunidades.pantallas.PantallaPrincipal
 import com.example.appcomunidades.pantallas.PantallaCrearAnuncio
 import com.example.appcomunidades.pantallas.PantallaCrearIncidencia
@@ -98,7 +99,7 @@ class AccionesDeNavegacion(private val navController : NavHostController) {
     }
 
     /* Navegación a la pantalla de crear incidencia */
-    val navegarACrearIncidencia: () -> Unit = {  // ← NUEVA FUNCIÓN
+    val navegarACrearIncidencia: () -> Unit = {
         navController.navigate(RutasNavegacion.CrearIncidencia.name)
     }
 }
@@ -147,6 +148,14 @@ fun NavegacionAppComunidaeds(
                     // Implementar la lógica para guardar el usuario en Firebase
                     accionesNavegacion.navegarAPrincipal()
                 }
+            )
+        }
+
+        /* Definición de Recuperar Contraseña */
+        composable(RutasNavegacion.RecuperarContrasenna.name) {
+            PantallaRecuperarContrasenna(
+                onVolverClick = accionesNavegacion.volver,
+                onVolverLoginClick = accionesNavegacion.navegarAIniciarSesion
             )
         }
 
