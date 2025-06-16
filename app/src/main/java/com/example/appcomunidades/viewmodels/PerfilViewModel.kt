@@ -80,7 +80,7 @@ class PerfilViewModel : ViewModel() {
                 println("DEBUG: Usuario Auth - UID: $uid, Email: $email")
 
                 // Buscar datos completos en Firestore
-                val datosFirestore = obtenerDatosDeFirestore(email)
+                val datosFirestore = obtenerDatosDeFirestore(email.lowercase().trim())
 
                 if (datosFirestore != null) {
                     println("DEBUG: ✅ Datos obtenidos de Firestore")
@@ -114,8 +114,11 @@ class PerfilViewModel : ViewModel() {
         return try {
             println("DEBUG: Buscando usuario en Firestore con email: $email")
 
+            // ESTRATEGIA 1: Buscar por email normalizado
+            val emailNormalizado = email.lowercase().trim()
+
             val snapshot = firestore.collection("usuarios")
-                .whereEqualTo("email", email)
+                .whereEqualTo("email", emailNormalizado)
                 .get()
                 .await()
 
@@ -128,14 +131,60 @@ class PerfilViewModel : ViewModel() {
                     esAdmin = documento.getBoolean("es_admin") ?: false
                 )
 
-                println("DEBUG: Datos encontrados - Nombre: ${datos.nombre}, Admin: ${datos.esAdmin}, Comunidad: ${datos.comunidadId}")
-                datos
-            } else {
-                println("DEBUG: No se encontró usuario en Firestore")
-                null
+                println("DEBUG: ✅ Datos encontrados por email - Nombre: ${datos.nombre}, Admin: ${datos.esAdmin}")
+                return datos
             }
+
+            println("DEBUG: No encontrado por email, intentando por UID...")
+
+            // ESTRATEGIA 2: Buscar por UID del usuario autenticado
+            val uid = auth.currentUser?.uid ?: return null
+
+            // Buscar documento que tenga referencia al UID o donde el ID del documento sea el UID
+            val snapshotPorUid = firestore.collection("usuarios")
+                .whereEqualTo("firebase_uid", uid)
+                .get()
+                .await()
+
+            if (!snapshotPorUid.isEmpty) {
+                val documento = snapshotPorUid.documents[0]
+                val datos = DatosPerfilUsuario(
+                    nombre = documento.getString("nombre") ?: "Usuario",
+                    email = documento.getString("email") ?: email,
+                    comunidadId = documento.getString("comunidad_id") ?: "Sin asignar",
+                    esAdmin = documento.getBoolean("es_admin") ?: false
+                )
+                println("DEBUG: ✅ Datos encontrados por UID - Nombre: ${datos.nombre}")
+                return datos
+            }
+
+            println("DEBUG: Intentando buscar por coincidencia parcial de email...")
+
+            // ESTRATEGIA 3: Obtener TODOS los usuarios y buscar coincidencia
+            val todosUsuarios = firestore.collection("usuarios")
+                .get()
+                .await()
+
+            for (doc in todosUsuarios.documents) {
+                val emailDoc = doc.getString("email")?.lowercase()?.trim()
+                if (emailDoc == emailNormalizado) {
+                    val datos = DatosPerfilUsuario(
+                        nombre = doc.getString("nombre") ?: "Usuario",
+                        email = doc.getString("email") ?: email,
+                        comunidadId = doc.getString("comunidad_id") ?: "Sin asignar",
+                        esAdmin = doc.getBoolean("es_admin") ?: false
+                    )
+                    println("DEBUG: ✅ Datos encontrados por búsqueda manual - Nombre: ${datos.nombre}")
+                    return datos
+                }
+            }
+
+            println("DEBUG: ❌ Usuario no encontrado con ninguna estrategia")
+            null
+
         } catch (e: Exception) {
-            println("DEBUG: Error consultando Firestore: ${e.message}")
+            println("DEBUG: ❌ Error consultando Firestore: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
@@ -235,6 +284,54 @@ class PerfilViewModel : ViewModel() {
             println("DEBUG: =============================")
         } else {
             println("DEBUG: No hay usuario autenticado")
+        }
+    }
+
+    /**
+     * FUNCIÓN DE DEBUG TEMPORAL - Verificar datos en Firestore
+     */
+    fun debug_verificarFirestore() {
+        val email = auth.currentUser?.email ?: return
+
+        viewModelScope.launch {
+            try {
+                println("DEBUG: === VERIFICANDO FIRESTORE ===")
+                println("DEBUG: Buscando usuario con email: $email")
+
+                val snapshot = firestore.collection("usuarios")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .await()
+
+                if (snapshot.isEmpty) {
+                    println("DEBUG: ❌ PROBLEMA: Usuario NO encontrado en Firestore")
+                    println("DEBUG: Email buscado: $email")
+
+                    // Mostrar TODOS los usuarios en Firestore para comparar
+                    val todosUsuarios = firestore.collection("usuarios")
+                        .get()
+                        .await()
+
+                    println("DEBUG: === USUARIOS EN FIRESTORE ===")
+                    for (doc in todosUsuarios.documents) {
+                        println("DEBUG: Email en DB: ${doc.getString("email")}")
+                        println("DEBUG: Nombre en DB: ${doc.getString("nombre")}")
+                        println("DEBUG: ID: ${doc.id}")
+                        println("DEBUG: ---")
+                    }
+                } else {
+                    println("DEBUG: ✅ Usuario encontrado en Firestore")
+                    val doc = snapshot.documents[0]
+                    println("DEBUG: Nombre: ${doc.getString("nombre")}")
+                    println("DEBUG: Email: ${doc.getString("email")}")
+                    println("DEBUG: Comunidad: ${doc.getString("comunidad_id")}")
+                    println("DEBUG: Es Admin: ${doc.getBoolean("es_admin")}")
+                }
+
+            } catch (e: Exception) {
+                println("DEBUG: ❌ Error verificando Firestore: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 }

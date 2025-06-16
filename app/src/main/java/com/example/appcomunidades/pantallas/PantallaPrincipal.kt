@@ -38,7 +38,6 @@ enum class SeccionPrincipal(
 ) {
     ANUNCIOS("Anuncios", Icons.Default.Notifications, Color(0xFF06141B)),
     INCIDENCIAS("Incidencias", Icons.Default.Warning, Color(0xFF253745)),
-    USUARIOS("Usuarios", Icons.Default.AccountBox, Color(0xFF4A5C6A))
 }
 
 // Data classes de ejemplo para el diseño
@@ -52,13 +51,6 @@ data class AnuncioEjemplo(
     val categoria: String = "",
     val colorCategoria: Long = 0xFF616161,
     val comunidadId: String = ""
-)
-
-data class UsuarioEjemplo(
-    val id: String,
-    val nombre: String,
-    val email: String,
-    val esAdmin: Boolean
 )
 
 /* COMPONENTES ESPECÍFICOS DE LA PANTALLA PRINCIPAL */
@@ -490,93 +482,6 @@ fun TarjetaIncidenciaSimple(
 }
 
 @Composable
-fun TarjetaUsuario(
-    usuario: UsuarioEjemplo,
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (usuario.esAdmin) Color(0xFF06141B).copy(alpha = 0.2f)
-                        else Color(0xFF4A5C6A).copy(alpha = 0.2f)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = usuario.nombre.take(2).uppercase(),
-                    fontWeight = FontWeight.Bold,
-                    color = if (usuario.esAdmin) Color(0xFF06141B) else Color(0xFF4A5C6A)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = usuario.nombre,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF253745)
-                    )
-                    if (usuario.esAdmin) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Card(
-                            shape = RoundedCornerShape(4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFF06141B).copy(alpha = 0.1f)
-                            )
-                        ) {
-                            Text(
-                                text = "ADMIN",
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF06141B)
-                            )
-                        }
-                    }
-                }
-                Text(
-                    text = usuario.email,
-                    fontSize = 14.sp,
-                    color = Color(0xFF4A5C6A)
-                )
-            }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Ver detalles",
-                tint = Color(0xFF9BA8AB)
-            )
-        }
-    }
-}
-
-@Composable
 fun BotonFlotanteCrear(
     texto: String,
     onClick: () -> Unit,
@@ -660,35 +565,32 @@ fun PantallaPrincipal(
         perfilViewModel.refrescarPerfil()
     }
 
-    // Datos de ejemplo para usuarios (mantener hasta implementar)
-    val usuariosEjemplo = listOf(
-        UsuarioEjemplo("1", "María García", "maria@example.com", true),
-        UsuarioEjemplo("2", "Juan Pérez", "juan@example.com", false),
-        UsuarioEjemplo("3", "Ana López", "ana@example.com", false)
-    )
-
     Scaffold(
         containerColor = Color(0xFFCCD0CF),
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = seccionActual != SeccionPrincipal.USUARIOS,
-                enter = scaleIn() + fadeIn(),
-                exit = scaleOut() + fadeOut()
+            ExtendedFloatingActionButton(
+                onClick = {
+                    when (seccionActual) {
+                        SeccionPrincipal.ANUNCIOS -> onCrearAnuncioClick()
+                        SeccionPrincipal.INCIDENCIAS -> onCrearIncidenciaClick()
+                    }
+                },
+                containerColor = seccionActual.color,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                BotonFlotanteCrear(
-                    texto = when (seccionActual) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Crear",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = when (seccionActual) {
                         SeccionPrincipal.ANUNCIOS -> "Nuevo Anuncio"
                         SeccionPrincipal.INCIDENCIAS -> "Nueva Incidencia"
-                        else -> ""
                     },
-                    onClick = {
-                        when (seccionActual) {
-                            SeccionPrincipal.ANUNCIOS -> onCrearAnuncioClick()
-                            SeccionPrincipal.INCIDENCIAS -> onCrearIncidenciaClick()
-                            else -> { /* No hacer nada */ }
-                        }
-                    },
-                    color = seccionActual.color
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
@@ -970,23 +872,9 @@ fun PantallaPrincipal(
                                 }
                             }
                         }
-
-                        SeccionPrincipal.USUARIOS -> {
-                            items(usuariosEjemplo) { usuario ->
-                                TarjetaUsuario(
-                                    usuario = usuario,
-                                    onClick = { /* Ver detalle */ }
-                                )
-                            }
-                        }
                     }
-
                     // Espacio extra al final para el FAB
-                    if (seccion != SeccionPrincipal.USUARIOS) {
-                        item {
-                            Spacer(modifier = Modifier.height(80.dp))
-                        }
-                    }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
             }
         }
