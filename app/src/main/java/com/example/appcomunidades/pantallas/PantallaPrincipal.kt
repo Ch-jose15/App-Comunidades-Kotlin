@@ -26,17 +26,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appcomunidades.ui.theme.*
+import com.example.appcomunidades.componentes.*
+import com.example.appcomunidades.viewmodels.EstadoPerfil
 
-/* ENUMS Y DATA CLASSES */
+/* ENUMS Y DATA CLASSES DE LA PANTALLA PRINCIPAL */
 
 enum class SeccionPrincipal(
     val titulo: String,
     val icono: ImageVector,
     val color: Color
 ) {
-    ANUNCIOS("Anuncios", Icons.Default.Notifications, ColorPrimario),
-    INCIDENCIAS("Incidencias", Icons.Default.Warning, ColorSecundario),
-    USUARIOS("Usuarios", Icons.Default.AccountBox, ColorPrimarioVariante)
+    ANUNCIOS("Anuncios", Icons.Default.Notifications, Color(0xFF06141B)),
+    INCIDENCIAS("Incidencias", Icons.Default.Warning, Color(0xFF253745)),
+    USUARIOS("Usuarios", Icons.Default.AccountBox, Color(0xFF4A5C6A))
 }
 
 // Data classes de ejemplo para el diseño
@@ -59,11 +61,12 @@ data class UsuarioEjemplo(
     val esAdmin: Boolean
 )
 
-/* COMPONENTES BÁSICOS */
+/* COMPONENTES ESPECÍFICOS DE LA PANTALLA PRINCIPAL */
 
 @Composable
 fun BarraSuperior(
     onPerfilClick: () -> Unit = {},
+    datosUsuario: DatosPerfilUsuario? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -76,20 +79,33 @@ fun BarraSuperior(
         // Logo lado izquierdo
         LogoHorizontal()
 
-        // Icono de perfil lado derecho
-        IconButton(
-            onClick = onPerfilClick,
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(ColorPrimario.copy(alpha = 0.1f))
-        ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Perfil",
-                tint = ColorPrimario,
-                modifier = Modifier.size(32.dp)
-            )
+        // Avatar del usuario lado derecho
+        if (datosUsuario != null) {
+            IconButton(
+                onClick = onPerfilClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                AvatarUsuario(
+                    datos = datosUsuario,
+                    tamano = 44
+                )
+            }
+        } else {
+            // Fallback al icono por defecto
+            IconButton(
+                onClick = onPerfilClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF06141B).copy(alpha = 0.1f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Perfil",
+                    tint = Color(0xFF06141B),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
     }
 }
@@ -107,7 +123,7 @@ fun LogoHorizontal(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(ColorPrimario),
+                .background(Color(0xFF06141B)),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -123,13 +139,13 @@ fun LogoHorizontal(
                 text = "Habitat",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = ColorTexto
+                color = Color(0xFF253745)
             )
             Text(
                 text = "DIGITAL",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Light,
-                color = ColorSecundario,
+                color = Color(0xFF4A5C6A),
                 letterSpacing = 2.sp
             )
         }
@@ -206,7 +222,7 @@ fun TabNavegacion(
             Icon(
                 imageVector = seccion.icono,
                 contentDescription = seccion.titulo,
-                tint = if (estaSeleccionado) seccion.color else ColorSecundario,
+                tint = if (estaSeleccionado) seccion.color else Color(0xFF9BA8AB),
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -214,7 +230,7 @@ fun TabNavegacion(
                 text = seccion.titulo,
                 fontSize = 12.sp,
                 fontWeight = if (estaSeleccionado) FontWeight.Bold else FontWeight.Normal,
-                color = if (estaSeleccionado) seccion.color else ColorSecundario
+                color = if (estaSeleccionado) seccion.color else Color(0xFF9BA8AB)
             )
         }
     }
@@ -255,7 +271,7 @@ fun TarjetaAnuncio(
                         text = anuncio.titulo,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = ColorTexto,
+                        color = Color(0xFF253745),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -263,7 +279,7 @@ fun TarjetaAnuncio(
                     Text(
                         text = anuncio.contenido,
                         fontSize = 14.sp,
-                        color = ColorSecundario,
+                        color = Color(0xFF4A5C6A),
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -301,20 +317,20 @@ fun TarjetaAnuncio(
                     Text(
                         text = "Por: ${anuncio.autor}",
                         fontSize = 12.sp,
-                        color = ColorPrimarioVariante,
+                        color = Color(0xFF06141B),
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = anuncio.fecha,
                         fontSize = 11.sp,
-                        color = ColorSecundario
+                        color = Color(0xFF9BA8AB)
                     )
                     // Mostrar comunidad si no está vacía
                     if (anuncio.comunidadId.isNotEmpty()) {
                         Text(
                             text = "📍 ${anuncio.comunidadId}",
                             fontSize = 10.sp,
-                            color = ColorSecundario.copy(alpha = 0.8f),
+                            color = Color(0xFF9BA8AB).copy(alpha = 0.8f),
                             modifier = Modifier.padding(top = 2.dp)
                         )
                     }
@@ -375,7 +391,7 @@ fun TarjetaIncidenciaSimple(
                         text = incidencia.titulo,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = ColorTexto,
+                        color = Color(0xFF253745),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -383,7 +399,7 @@ fun TarjetaIncidenciaSimple(
                     Text(
                         text = incidencia.descripcion,
                         fontSize = 14.sp,
-                        color = ColorSecundario,
+                        color = Color(0xFF4A5C6A),
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -427,19 +443,19 @@ fun TarjetaIncidenciaSimple(
                     Text(
                         text = "Por: ${incidencia.nombre_autor}",
                         fontSize = 12.sp,
-                        color = ColorPrimarioVariante,
+                        color = Color(0xFF06141B),
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = incidencia.fecha_formateada,
                         fontSize = 11.sp,
-                        color = ColorSecundario
+                        color = Color(0xFF9BA8AB)
                     )
                     if (incidencia.comunidad_id.isNotEmpty()) {
                         Text(
                             text = "📍 ${incidencia.comunidad_id}",
                             fontSize = 10.sp,
-                            color = ColorSecundario.copy(alpha = 0.8f),
+                            color = Color(0xFF9BA8AB).copy(alpha = 0.8f),
                             modifier = Modifier.padding(top = 2.dp)
                         )
                     }
@@ -457,7 +473,7 @@ fun TarjetaIncidenciaSimple(
                                 when (incidencia.estado) {
                                     "resuelta" -> Color.Green
                                     "en proceso" -> Color(0xFFFFA726)
-                                    else -> ColorSecundario
+                                    else -> Color(0xFF9BA8AB)
                                 }
                             )
                     )
@@ -465,7 +481,7 @@ fun TarjetaIncidenciaSimple(
                     Text(
                         text = incidencia.estado,
                         fontSize = 12.sp,
-                        color = ColorSecundario
+                        color = Color(0xFF4A5C6A)
                     )
                 }
             }
@@ -502,15 +518,15 @@ fun TarjetaUsuario(
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(
-                        if (usuario.esAdmin) ColorPrimario.copy(alpha = 0.2f)
-                        else ColorSecundario.copy(alpha = 0.2f)
+                        if (usuario.esAdmin) Color(0xFF06141B).copy(alpha = 0.2f)
+                        else Color(0xFF4A5C6A).copy(alpha = 0.2f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = usuario.nombre.take(2).uppercase(),
                     fontWeight = FontWeight.Bold,
-                    color = if (usuario.esAdmin) ColorPrimario else ColorSecundario
+                    color = if (usuario.esAdmin) Color(0xFF06141B) else Color(0xFF4A5C6A)
                 )
             }
 
@@ -524,14 +540,14 @@ fun TarjetaUsuario(
                         text = usuario.nombre,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        color = ColorTexto
+                        color = Color(0xFF253745)
                     )
                     if (usuario.esAdmin) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Card(
                             shape = RoundedCornerShape(4.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = ColorPrimario.copy(alpha = 0.1f)
+                                containerColor = Color(0xFF06141B).copy(alpha = 0.1f)
                             )
                         ) {
                             Text(
@@ -539,7 +555,7 @@ fun TarjetaUsuario(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = ColorPrimario
+                                color = Color(0xFF06141B)
                             )
                         }
                     }
@@ -547,14 +563,14 @@ fun TarjetaUsuario(
                 Text(
                     text = usuario.email,
                     fontSize = 14.sp,
-                    color = ColorSecundario
+                    color = Color(0xFF4A5C6A)
                 )
             }
 
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Ver detalles",
-                tint = ColorSecundario
+                tint = Color(0xFF9BA8AB)
             )
         }
     }
@@ -594,24 +610,54 @@ fun BotonFlotanteCrear(
 fun PantallaPrincipal(
     onCrearAnuncioClick: () -> Unit = {},
     onCrearIncidenciaClick: () -> Unit = {},
-    viewModel: com.example.appcomunidades.viewmodels.PantallaPrincipalViewModel = viewModel()
+    onCerrarSesion: () -> Unit = {},
+    viewModel: com.example.appcomunidades.viewmodels.PantallaPrincipalViewModel = viewModel(),
+    perfilViewModel: com.example.appcomunidades.viewmodels.PerfilViewModel = viewModel()
 ) {
     var seccionActual by remember { mutableStateOf(SeccionPrincipal.ANUNCIOS) }
 
-    // Estados del ViewModel para ANUNCIOS
+    // Estados para el perfil
+    var mostrarBottomSheetPerfil by remember { mutableStateOf(false) }
+    var mostrarDialogoCerrarSesion by remember { mutableStateOf(false) }
+
+    // Estados del ViewModel principal para ANUNCIOS
     val anunciosReales by viewModel.anunciosParaUI.collectAsState()
     val estaCargando by viewModel.estaCargando.collectAsState()
     val mensajeError by viewModel.mensajeError.collectAsState()
 
-    // Estados del ViewModel para INCIDENCIAS
+    // Estados del ViewModel principal para INCIDENCIAS
     val incidencias by viewModel.incidencias.collectAsState()
     val estaCargandoIncidencias by viewModel.estaCargandoIncidencias.collectAsState()
     val mensajeErrorIncidencias by viewModel.mensajeErrorIncidencias.collectAsState()
+
+    // Estados del ViewModel de perfil
+    val estadoPerfil by perfilViewModel.estadoPerfil.collectAsState()
+    val datosPerfil by perfilViewModel.datosPerfil.collectAsState()
+    val estadoCerrarSesion by perfilViewModel.estadoCerrarSesion.collectAsState()
+
+    // Manejar el resultado de cerrar sesión
+    LaunchedEffect(estadoCerrarSesion) {
+        when (estadoCerrarSesion) {
+            is com.example.appcomunidades.viewmodels.EstadoCerrarSesion.Completado -> {
+                mostrarDialogoCerrarSesion = false
+                mostrarBottomSheetPerfil = false
+                onCerrarSesion()
+                perfilViewModel.reiniciarEstadoCerrarSesion()
+            }
+            else -> { /* No hacer nada */ }
+        }
+    }
+
+    // Función para manejar cerrar sesión
+    val manejarCerrarSesion = {
+        perfilViewModel.cerrarSesion()
+    }
 
     // Refrescar datos cuando se regrese a la pantalla
     LaunchedEffect(key1 = true) {
         viewModel.refrescarAnuncios()
         viewModel.refrescarIncidencias()
+        perfilViewModel.refrescarPerfil()
     }
 
     // Datos de ejemplo para usuarios (mantener hasta implementar)
@@ -622,7 +668,7 @@ fun PantallaPrincipal(
     )
 
     Scaffold(
-        containerColor = ColorFondo,
+        containerColor = Color(0xFFCCD0CF),
         floatingActionButton = {
             AnimatedVisibility(
                 visible = seccionActual != SeccionPrincipal.USUARIOS,
@@ -653,7 +699,7 @@ fun PantallaPrincipal(
                 .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(ColorFondo, ColorFondoSecundario.copy(alpha = 0.3f)),
+                        colors = listOf(Color(0xFFCCD0CF), Color(0xFF9BA8AB).copy(alpha = 0.3f)),
                         startY = 0f,
                         endY = 1000f
                     )
@@ -661,7 +707,8 @@ fun PantallaPrincipal(
         ) {
             // Barra superior con logo y perfil
             BarraSuperior(
-                onPerfilClick = { /* Navegar a perfil */ }
+                onPerfilClick = { mostrarBottomSheetPerfil = true },
+                datosUsuario = datosPerfil ?: perfilViewModel.obtenerDatosBasicos()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -713,7 +760,9 @@ fun PantallaPrincipal(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-            }// Contenido según la sección
+            }
+
+            // Contenido según la sección
             AnimatedContent(
                 targetState = seccionActual,
                 transitionSpec = {
@@ -743,13 +792,13 @@ fun PantallaPrincipal(
                                         ) {
                                             CircularProgressIndicator(
                                                 modifier = Modifier.size(20.dp),
-                                                color = ColorPrimario,
+                                                color = Color(0xFF06141B),
                                                 strokeWidth = 2.dp
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
                                                 text = "Cargando anuncios...",
-                                                color = ColorSecundario
+                                                color = Color(0xFF4A5C6A)
                                             )
                                         }
                                     }
@@ -770,7 +819,7 @@ fun PantallaPrincipal(
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = ColorPrimario.copy(alpha = 0.1f)
+                                            containerColor = Color(0xFF06141B).copy(alpha = 0.1f)
                                         )
                                     ) {
                                         Column(
@@ -782,7 +831,7 @@ fun PantallaPrincipal(
                                             Icon(
                                                 imageVector = Icons.Default.Info,
                                                 contentDescription = "Sin anuncios",
-                                                tint = ColorPrimario,
+                                                tint = Color(0xFF06141B),
                                                 modifier = Modifier.size(48.dp)
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
@@ -790,12 +839,12 @@ fun PantallaPrincipal(
                                                 text = "No hay anuncios aún",
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = ColorTexto
+                                                color = Color(0xFF253745)
                                             )
                                             Text(
                                                 text = "¡Sé el primero en crear un anuncio!",
                                                 fontSize = 14.sp,
-                                                color = ColorSecundario,
+                                                color = Color(0xFF4A5C6A),
                                                 textAlign = TextAlign.Center
                                             )
                                         }
@@ -861,13 +910,13 @@ fun PantallaPrincipal(
                                         ) {
                                             CircularProgressIndicator(
                                                 modifier = Modifier.size(20.dp),
-                                                color = ColorPrimario,
+                                                color = Color(0xFF06141B),
                                                 strokeWidth = 2.dp
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
                                                 text = "Cargando incidencias...",
-                                                color = ColorSecundario
+                                                color = Color(0xFF4A5C6A)
                                             )
                                         }
                                     }
@@ -888,7 +937,7 @@ fun PantallaPrincipal(
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = ColorSecundario.copy(alpha = 0.1f)
+                                            containerColor = Color(0xFF253745).copy(alpha = 0.1f)
                                         )
                                     ) {
                                         Column(
@@ -900,7 +949,7 @@ fun PantallaPrincipal(
                                             Icon(
                                                 imageVector = Icons.Default.Warning,
                                                 contentDescription = "Sin incidencias",
-                                                tint = ColorSecundario,
+                                                tint = Color(0xFF253745),
                                                 modifier = Modifier.size(48.dp)
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
@@ -908,12 +957,12 @@ fun PantallaPrincipal(
                                                 text = "No hay incidencias aún",
                                                 fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = ColorTexto
+                                                color = Color(0xFF253745)
                                             )
                                             Text(
                                                 text = "¡Sé el primero en reportar una incidencia!",
                                                 fontSize = 14.sp,
-                                                color = ColorSecundario,
+                                                color = Color(0xFF4A5C6A),
                                                 textAlign = TextAlign.Center
                                             )
                                         }
@@ -942,12 +991,39 @@ fun PantallaPrincipal(
             }
         }
     }
+
+    // BottomSheet del perfil
+    if (datosPerfil != null) {
+        BottomSheetPerfil(
+            mostrar = mostrarBottomSheetPerfil,
+            onDismiss = { mostrarBottomSheetPerfil = false },
+            datos = datosPerfil!!,
+            onCerrarSesion = { mostrarDialogoCerrarSesion = true },
+            estaCargandoCerrarSesion = estadoCerrarSesion is com.example.appcomunidades.viewmodels.EstadoCerrarSesion.Cargando
+        )
+    }
+
+    // Diálogo de confirmación para cerrar sesión
+    DialogoConfirmarCerrarSesion(
+        mostrar = mostrarDialogoCerrarSesion,
+        onConfirmar = manejarCerrarSesion,
+        onCancelar = { mostrarDialogoCerrarSesion = false }
+    )
+
+    // Mostrar error de perfil si hay alguno
+    LaunchedEffect(estadoPerfil) {
+        if (estadoPerfil is com.example.appcomunidades.viewmodels.EstadoPerfil.Error) {
+            println("DEBUG: Error en perfil: ${(estadoPerfil as EstadoPerfil.Error).mensaje}")
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PantallaPrincipalPreview() {
     TemaAppComunidades {
-        PantallaPrincipal()
+        PantallaPrincipal(
+            onCerrarSesion = { /* Simular cerrar sesión */ }
+        )
     }
 }

@@ -163,7 +163,8 @@ fun NavegacionAppComunidaeds(
         composable(RutasNavegacion.Principal.name) {
             PantallaPrincipal(
                 onCrearAnuncioClick = accionesNavegacion.navegarACrearAnuncio,
-                onCrearIncidenciaClick = accionesNavegacion.navegarACrearIncidencia
+                onCrearIncidenciaClick = accionesNavegacion.navegarACrearIncidencia,
+                onCerrarSesion = accionesNavegacion.navegarAInicio
             )
         }
 
