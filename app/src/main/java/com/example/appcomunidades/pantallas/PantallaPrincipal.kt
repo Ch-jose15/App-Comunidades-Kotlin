@@ -20,9 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appcomunidades.ui.theme.*
 
 /* ENUMS Y DATA CLASSES */
@@ -44,16 +46,10 @@ data class AnuncioEjemplo(
     val contenido: String,
     val esUrgente: Boolean,
     val fecha: String,
-    val autor: String
-)
-
-data class IncidenciaEjemplo(
-    val id: String,
-    val titulo: String,
-    val descripcion: String,
-    val prioridad: String,
-    val estado: String,
-    val fecha: String
+    val autor: String,
+    val categoria: String = "",
+    val colorCategoria: Long = 0xFF616161,
+    val comunidadId: String = ""
 )
 
 data class UsuarioEjemplo(
@@ -63,7 +59,7 @@ data class UsuarioEjemplo(
     val esAdmin: Boolean
 )
 
-/* COMPONENTES ATOMIZADOS */
+/* COMPONENTES BÁSICOS */
 
 @Composable
 fun BarraSuperior(
@@ -224,6 +220,8 @@ fun TabNavegacion(
     }
 }
 
+/* COMPONENTES DE TARJETAS */
+
 @Composable
 fun TarjetaAnuncio(
     anuncio: AnuncioEjemplo,
@@ -246,6 +244,7 @@ fun TarjetaAnuncio(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Fila superior: Título y etiqueta de urgente
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -270,6 +269,7 @@ fun TarjetaAnuncio(
                     )
                 }
 
+                // Etiqueta de urgente
                 if (anuncio.esUrgente) {
                     Card(
                         shape = RoundedCornerShape(8.dp),
@@ -290,29 +290,61 @@ fun TarjetaAnuncio(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Fila inferior: Autor, fecha, categoría y comunidad
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = anuncio.autor,
-                    fontSize = 12.sp,
-                    color = ColorPrimarioVariante
-                )
-                Text(
-                    text = anuncio.fecha,
-                    fontSize = 12.sp,
-                    color = ColorSecundario
-                )
+                // Columna izquierda: Autor y comunidad
+                Column {
+                    Text(
+                        text = "Por: ${anuncio.autor}",
+                        fontSize = 12.sp,
+                        color = ColorPrimarioVariante,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = anuncio.fecha,
+                        fontSize = 11.sp,
+                        color = ColorSecundario
+                    )
+                    // Mostrar comunidad si no está vacía
+                    if (anuncio.comunidadId.isNotEmpty()) {
+                        Text(
+                            text = "📍 ${anuncio.comunidadId}",
+                            fontSize = 10.sp,
+                            color = ColorSecundario.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+
+                // Columna derecha: Categoría (si está disponible)
+                if (anuncio.categoria.isNotEmpty()) {
+                    Card(
+                        shape = RoundedCornerShape(6.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(anuncio.colorCategoria).copy(alpha = 0.1f)
+                        )
+                    ) {
+                        Text(
+                            text = anuncio.categoria,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(anuncio.colorCategoria)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun TarjetaIncidencia(
-    incidencia: IncidenciaEjemplo,
+fun TarjetaIncidenciaSimple(
+    incidencia: com.example.appcomunidades.modelos.Incidencia,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -332,6 +364,7 @@ fun TarjetaIncidencia(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Fila superior: Título y prioridad
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -351,16 +384,16 @@ fun TarjetaIncidencia(
                         text = incidencia.descripcion,
                         fontSize = 14.sp,
                         color = ColorSecundario,
-                        maxLines = 2,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                // Indicador de prioridad
+                // Etiqueta de prioridad
                 Card(
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = when (incidencia.prioridad.lowercase()) {
+                        containerColor = when (incidencia.prioridad) {
                             "alta" -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
                             "media" -> Color(0xFFFFA726).copy(alpha = 0.1f)
                             else -> Color.Green.copy(alpha = 0.1f)
@@ -372,7 +405,7 @@ fun TarjetaIncidencia(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = when (incidencia.prioridad.lowercase()) {
+                        color = when (incidencia.prioridad) {
                             "alta" -> MaterialTheme.colorScheme.error
                             "media" -> Color(0xFFFF6F00)
                             else -> Color(0xFF388E3C)
@@ -383,12 +416,36 @@ fun TarjetaIncidencia(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Fila inferior: Autor, fecha, categoría y estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Estado
+                // Columna izquierda: Autor y comunidad
+                Column {
+                    Text(
+                        text = "Por: ${incidencia.nombre_autor}",
+                        fontSize = 12.sp,
+                        color = ColorPrimarioVariante,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = incidencia.fecha_formateada,
+                        fontSize = 11.sp,
+                        color = ColorSecundario
+                    )
+                    if (incidencia.comunidad_id.isNotEmpty()) {
+                        Text(
+                            text = "📍 ${incidencia.comunidad_id}",
+                            fontSize = 10.sp,
+                            color = ColorSecundario.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+
+                // Columna derecha: Estado
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -397,7 +454,7 @@ fun TarjetaIncidencia(
                             .size(8.dp)
                             .clip(CircleShape)
                             .background(
-                                when (incidencia.estado.lowercase()) {
+                                when (incidencia.estado) {
                                     "resuelta" -> Color.Green
                                     "en proceso" -> Color(0xFFFFA726)
                                     else -> ColorSecundario
@@ -411,12 +468,6 @@ fun TarjetaIncidencia(
                         color = ColorSecundario
                     )
                 }
-
-                Text(
-                    text = incidencia.fecha,
-                    fontSize = 12.sp,
-                    color = ColorSecundario
-                )
             }
         }
     }
@@ -540,22 +591,30 @@ fun BotonFlotanteCrear(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PantallaPrincipal() {
+fun PantallaPrincipal(
+    onCrearAnuncioClick: () -> Unit = {},
+    onCrearIncidenciaClick: () -> Unit = {},
+    viewModel: com.example.appcomunidades.viewmodels.PantallaPrincipalViewModel = viewModel()
+) {
     var seccionActual by remember { mutableStateOf(SeccionPrincipal.ANUNCIOS) }
 
-    // Datos de ejemplo
-    val anunciosEjemplo = listOf(
-        AnuncioEjemplo("1", "Reunión de vecinos", "Se convoca a todos los propietarios a la reunión mensual...", true, "Hace 2 horas", "Admin"),
-        AnuncioEjemplo("2", "Mantenimiento ascensor", "El próximo lunes se realizará el mantenimiento...", false, "Ayer", "Admin"),
-        AnuncioEjemplo("3", "Horario de piscina", "Recordamos que el horario de verano de la piscina...", false, "Hace 3 días", "Admin")
-    )
+    // Estados del ViewModel para ANUNCIOS
+    val anunciosReales by viewModel.anunciosParaUI.collectAsState()
+    val estaCargando by viewModel.estaCargando.collectAsState()
+    val mensajeError by viewModel.mensajeError.collectAsState()
 
-    val incidenciasEjemplo = listOf(
-        IncidenciaEjemplo("1", "Fuga de agua en garaje", "Se ha detectado una fuga en el nivel -1", "alta", "En proceso", "Hoy"),
-        IncidenciaEjemplo("2", "Luz fundida en portal", "La luz del portal principal no funciona", "media", "Pendiente", "Ayer"),
-        IncidenciaEjemplo("3", "Ruidos molestos 3ºB", "Ruidos excesivos en horario nocturno", "baja", "Resuelta", "Hace 5 días")
-    )
+    // Estados del ViewModel para INCIDENCIAS
+    val incidencias by viewModel.incidencias.collectAsState()
+    val estaCargandoIncidencias by viewModel.estaCargandoIncidencias.collectAsState()
+    val mensajeErrorIncidencias by viewModel.mensajeErrorIncidencias.collectAsState()
 
+    // Refrescar datos cuando se regrese a la pantalla
+    LaunchedEffect(key1 = true) {
+        viewModel.refrescarAnuncios()
+        viewModel.refrescarIncidencias()
+    }
+
+    // Datos de ejemplo para usuarios (mantener hasta implementar)
     val usuariosEjemplo = listOf(
         UsuarioEjemplo("1", "María García", "maria@example.com", true),
         UsuarioEjemplo("2", "Juan Pérez", "juan@example.com", false),
@@ -576,7 +635,13 @@ fun PantallaPrincipal() {
                         SeccionPrincipal.INCIDENCIAS -> "Nueva Incidencia"
                         else -> ""
                     },
-                    onClick = { /* Acción de crear */ },
+                    onClick = {
+                        when (seccionActual) {
+                            SeccionPrincipal.ANUNCIOS -> onCrearAnuncioClick()
+                            SeccionPrincipal.INCIDENCIAS -> onCrearIncidenciaClick()
+                            else -> { /* No hacer nada */ }
+                        }
+                    },
                     color = seccionActual.color
                 )
             }
@@ -609,7 +674,46 @@ fun PantallaPrincipal() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Contenido según la sección
+            // Mostrar mensaje de error si hay (ANUNCIOS)
+            mensajeError?.let { error ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = {
+                                viewModel.limpiarError()
+                                viewModel.refrescarAnuncios()
+                            }
+                        ) {
+                            Text("Reintentar", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }// Contenido según la sección
             AnimatedContent(
                 targetState = seccionActual,
                 transitionSpec = {
@@ -623,21 +727,201 @@ fun PantallaPrincipal() {
                 ) {
                     when (seccion) {
                         SeccionPrincipal.ANUNCIOS -> {
-                            items(anunciosEjemplo) { anuncio ->
-                                TarjetaAnuncio(
-                                    anuncio = anuncio,
-                                    onClick = { /* Ver detalle */ }
-                                )
+                            // Mostrar indicador de carga si está cargando
+                            if (estaCargando) {
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                color = ColorPrimario,
+                                                strokeWidth = 2.dp
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Cargando anuncios...",
+                                                color = ColorSecundario
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Mostrar anuncios reales
+                            if (anunciosReales.isNotEmpty()) {
+                                items(anunciosReales) { anuncio ->
+                                    TarjetaAnuncio(
+                                        anuncio = anuncio,
+                                        onClick = { /* Ver detalle */ }
+                                    )
+                                }
+                            } else if (!estaCargando) {
+                                // Mostrar mensaje si no hay anuncios
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = ColorPrimario.copy(alpha = 0.1f)
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(24.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Info,
+                                                contentDescription = "Sin anuncios",
+                                                tint = ColorPrimario,
+                                                modifier = Modifier.size(48.dp)
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Text(
+                                                text = "No hay anuncios aún",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = ColorTexto
+                                            )
+                                            Text(
+                                                text = "¡Sé el primero en crear un anuncio!",
+                                                fontSize = 14.sp,
+                                                color = ColorSecundario,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
+
                         SeccionPrincipal.INCIDENCIAS -> {
-                            items(incidenciasEjemplo) { incidencia ->
-                                TarjetaIncidencia(
-                                    incidencia = incidencia,
-                                    onClick = { /* Ver detalle */ }
-                                )
+                            // Mostrar mensaje de error si hay (INCIDENCIAS)
+                            mensajeErrorIncidencias?.let { error ->
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Warning,
+                                                contentDescription = "Error",
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = error,
+                                                color = MaterialTheme.colorScheme.error,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            TextButton(
+                                                onClick = {
+                                                    viewModel.limpiarErrorIncidencias()
+                                                    viewModel.refrescarIncidencias()
+                                                }
+                                            ) {
+                                                Text("Reintentar", color = MaterialTheme.colorScheme.error)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Mostrar indicador de carga
+                            if (estaCargandoIncidencias) {
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                color = ColorPrimario,
+                                                strokeWidth = 2.dp
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Cargando incidencias...",
+                                                color = ColorSecundario
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Mostrar incidencias
+                            if (incidencias.isNotEmpty()) {
+                                items(incidencias) { incidencia ->
+                                    TarjetaIncidenciaSimple(
+                                        incidencia = incidencia,
+                                        onClick = { /* Ver detalle */ }
+                                    )
+                                }
+                            } else if (!estaCargandoIncidencias && mensajeErrorIncidencias == null) {
+                                // Mostrar mensaje si no hay incidencias
+                                item {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = ColorSecundario.copy(alpha = 0.1f)
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(24.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Warning,
+                                                contentDescription = "Sin incidencias",
+                                                tint = ColorSecundario,
+                                                modifier = Modifier.size(48.dp)
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Text(
+                                                text = "No hay incidencias aún",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = ColorTexto
+                                            )
+                                            Text(
+                                                text = "¡Sé el primero en reportar una incidencia!",
+                                                fontSize = 14.sp,
+                                                color = ColorSecundario,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
+
                         SeccionPrincipal.USUARIOS -> {
                             items(usuariosEjemplo) { usuario ->
                                 TarjetaUsuario(

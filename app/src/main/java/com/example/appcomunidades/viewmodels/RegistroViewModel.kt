@@ -2,12 +2,10 @@ package com.example.appcomunidades.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.appcomunidades.repositorios.AuthRepositorio
+import com.example.appcomunidades.repositorios.ResultadoAuth
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 sealed class EstadoRegistro {
     object Inicial : EstadoRegistro()
@@ -17,6 +15,9 @@ sealed class EstadoRegistro {
 }
 
 class RegistroViewModel : ViewModel() {
+
+    // Repositorio de autenticación
+    private val authRepositorio = AuthRepositorio()
 
     // Estados del formulario
     private val _nombre = MutableStateFlow("")
@@ -50,76 +51,65 @@ class RegistroViewModel : ViewModel() {
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
 
-    // Validación del formulario
-    private val _formularioValido = MutableStateFlow(false)
-    val formularioValido: StateFlow<Boolean> = _formularioValido.asStateFlow()
+    // Validación del formulario en tiempo real
+    val formularioValido: StateFlow<Boolean> = combine(
+        _nombre, _email, _contrasenna, _confirmarContrasenna, _telefono, _idComunidad, _esAdministrador
+    ) { valores ->
+        val nombre = valores[0] as String
+        val email = valores[1] as String
+        val contrasenna = valores[2] as String
+        val confirmarContrasenna = valores[3] as String
+        val telefono = valores[4] as String
+        val idComunidad = valores[5] as String
+        val esAdministrador = valores[6] as Boolean
 
-    init {
-        // Observar cambios en los campos para validar el formulario
-        viewModelScope.launch {
-            combine(
-                nombre,
-                email,
-                contrasenna,
-                confirmarContrasenna,
-                telefono,
-                idComunidad,
-                esAdministrador
-            ) { valores ->
-                val nombreValor = valores[0] as String
-                val emailValor = valores[1] as String
-                val contrasennaValor = valores[2] as String
-                val confirmarContrasennaValor = valores[3] as String
-                val telefonoValor = valores[4] as String
-                val idComunidadValor = valores[5] as String
-                val esAdministradorValor = valores[6] as Boolean
+        val camposBasicosValidos = nombre.isNotBlank() &&
+                email.isNotBlank() &&
+                esEmailValido(email) &&
+                contrasenna.length >= 6 &&
+                contrasenna == confirmarContrasenna &&
+                telefono.isNotBlank()
 
-                // Validaciones básicas
-                val camposBasicosValidos = nombreValor.isNotBlank() &&
-                        emailValor.isNotBlank() &&
-                        emailValor.contains("@") &&
-                        contrasennaValor.length >= 6 &&
-                        contrasennaValor == confirmarContrasennaValor &&
-                        telefonoValor.isNotBlank()
+        // Si es administrador, no necesita ID de comunidad
+        // Si NO es administrador (es vecino), necesita ID de comunidad
+        val idComunidadValido = esAdministrador || idComunidad.isNotBlank()
 
-                // Si es administrador, no necesita ID de comunidad
-                // Si NO es administrador (es vecino), necesita ID de comunidad
-                val idComunidadValido = esAdministradorValor || idComunidadValor.isNotBlank()
-
-                camposBasicosValidos && idComunidadValido
-            }.collect { esValido ->
-                _formularioValido.value = esValido
-            }
-        }
-    }
-
-    // Firebase
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+        camposBasicosValidos && idComunidadValido
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
 
     // Funciones para actualizar estados
     fun actualizarNombre(nuevoNombre: String) {
         _nombre.value = nuevoNombre
+        limpiarError()
     }
 
     fun actualizarEmail(nuevoEmail: String) {
         _email.value = nuevoEmail.trim()
+        limpiarError()
     }
 
     fun actualizarContrasenna(nuevaContrasenna: String) {
         _contrasenna.value = nuevaContrasenna
+        limpiarError()
     }
 
     fun actualizarConfirmarContrasenna(nuevaConfirmacion: String) {
         _confirmarContrasenna.value = nuevaConfirmacion
+        limpiarError()
     }
 
     fun actualizarTelefono(nuevoTelefono: String) {
         _telefono.value = nuevoTelefono
+        limpiarError()
     }
 
     fun actualizarIdComunidad(nuevoId: String) {
         _idComunidad.value = nuevoId.trim()
+        limpiarError()
     }
 
     fun actualizarEsAdministrador(esAdmin: Boolean) {
@@ -128,8 +118,12 @@ class RegistroViewModel : ViewModel() {
         if (esAdmin) {
             _idComunidad.value = ""
         }
+        limpiarError()
     }
 
+    /**
+     * Obtiene mensaje de error para las contraseñas
+     */
     fun obtenerMensajeErrorContrasenna(): String? {
         return when {
             _contrasenna.value.isEmpty() || _confirmarContrasenna.value.isEmpty() -> null
@@ -139,142 +133,119 @@ class RegistroViewModel : ViewModel() {
         }
     }
 
-    suspend fun registrarUsuario() {
-        try {
-            _estadoRegistro.value = EstadoRegistro.Cargando
+    /**
+     * Valida si el email tiene formato correcto
+     */
+    private fun esEmailValido(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    /**
+     * Registra un nuevo usuario usando el repositorio
+     */
+    fun registrarUsuario() {
+        if (!formularioValido.value) {
+            _mensajeError.value = "Por favor, completa todos los campos correctamente"
+            return
+        }
+
+        _estadoRegistro.value = EstadoRegistro.Cargando
+        _mensajeError.value = null
+
+        viewModelScope.launch {
+            try {
+                val resultado = authRepositorio.registrarUsuario(
+                    nombre = _nombre.value.trim(),
+                    email = _email.value.trim(),
+                    contrasenna = _contrasenna.value,
+                    telefono = _telefono.value.trim(),
+                    comunidadId = if (_esAdministrador.value) "" else _idComunidad.value.trim(),
+                    esAdmin = _esAdministrador.value
+                )
+
+                when (resultado) {
+                    is ResultadoAuth.Exito -> {
+                        _estadoRegistro.value = EstadoRegistro.Exito
+                        _mostrarDialogoExito.value = true
+                        limpiarFormulario()
+                    }
+                    is ResultadoAuth.Error -> {
+                        _estadoRegistro.value = EstadoRegistro.Error(resultado.mensaje)
+                        _mensajeError.value = procesarMensajeError(resultado.mensaje)
+                    }
+                    is ResultadoAuth.Cargando -> {
+                        // Ya está en estado de carga
+                    }
+                }
+            } catch (e: Exception) {
+                _estadoRegistro.value = EstadoRegistro.Error("Error inesperado: ${e.message}")
+                _mensajeError.value = "Error inesperado al registrar la cuenta"
+            }
+        }
+    }
+
+    /**
+     * Procesa los mensajes de error para mostrar mensajes más amigables
+     */
+    private fun procesarMensajeError(mensajeOriginal: String): String {
+        return when {
+            mensajeOriginal.contains("email address is already in use") ||
+                    mensajeOriginal.contains("email-already-in-use") ->
+                "Este correo electrónico ya está registrado"
+
+            mensajeOriginal.contains("weak-password") ->
+                "La contraseña es demasiado débil"
+
+            mensajeOriginal.contains("invalid-email") ->
+                "El formato del email no es válido"
+
+            mensajeOriginal.contains("network") ||
+                    mensajeOriginal.contains("network-request-failed") ->
+                "Error de conexión. Verifica tu internet"
+
+            mensajeOriginal.contains("too-many-requests") ->
+                "Demasiados intentos. Intenta más tarde"
+
+            else -> "Error al crear la cuenta: $mensajeOriginal"
+        }
+    }
+
+    /**
+     * Limpia el mensaje de error
+     */
+    private fun limpiarError() {
+        if (_mensajeError.value != null) {
             _mensajeError.value = null
-
-            // Validación adicional antes de proceder
-            if (!_esAdministrador.value && _idComunidad.value.isBlank()) {
-                _estadoRegistro.value = EstadoRegistro.Error("El ID de comunidad es obligatorio para vecinos")
-                _mensajeError.value = "Debes ingresar un ID de comunidad válido"
-                return
-            }
-
-            // Si no es administrador, verificar que la comunidad existe
-            if (!_esAdministrador.value) {
-                val comunidadExiste = verificarComunidadExiste(_idComunidad.value)
-                if (!comunidadExiste) {
-                    _estadoRegistro.value = EstadoRegistro.Error("La comunidad no existe")
-                    _mensajeError.value = "El ID de comunidad ingresado no es válido"
-                    return
-                }
-            }
-
-            // Crear usuario en Firebase Auth
-            auth.createUserWithEmailAndPassword(_email.value, _contrasenna.value)
-                .addOnSuccessListener { authResult ->
-                    val userId = authResult.user?.uid ?: return@addOnSuccessListener
-
-                    viewModelScope.launch {
-                        if (_esAdministrador.value) {
-                            // Si es administrador, primero crear la comunidad
-                            crearComunidadYUsuario(userId)
-                        } else {
-                            // Si es vecino, solo crear el usuario con la comunidad existente
-                            crearUsuarioEnFirestore(userId, _idComunidad.value)
-                        }
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    val mensajeError = when {
-                        exception.message?.contains("email address is already in use") == true ->
-                            "Este correo electrónico ya está registrado"
-                        exception.message?.contains("network") == true ->
-                            "Error de conexión. Verifica tu internet"
-                        else -> "Error al crear la cuenta: ${exception.message}"
-                    }
-
-                    _estadoRegistro.value = EstadoRegistro.Error(mensajeError)
-                    _mensajeError.value = mensajeError
-                }
-
-        } catch (e: Exception) {
-            _estadoRegistro.value = EstadoRegistro.Error("Error inesperado: ${e.message}")
-            _mensajeError.value = "Error inesperado al registrar"
+        }
+        if (_estadoRegistro.value is EstadoRegistro.Error) {
+            _estadoRegistro.value = EstadoRegistro.Inicial
         }
     }
 
-    private suspend fun verificarComunidadExiste(idComunidad: String): Boolean {
-        return try {
-            val documento = firestore.collection("comunidades")
-                .document(idComunidad)
-                .get()
-                .await()
-
-            documento.exists()
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    private fun crearComunidadYUsuario(userId: String) {
-        // Generar ID único para la comunidad
-        val comunidadId = generarIdComunidad()
-
-        // Crear datos de la comunidad
-        val datosComunidad = hashMapOf(
-            "id" to comunidadId,
-            "nombre" to "Comunidad de ${_nombre.value}",
-            "direccion" to "", // Se puede actualizar después
-            "imagen" to "", // Se puede actualizar después
-            "fecha_creacion" to Date()
-        )
-
-        // Guardar comunidad en Firestore
-        firestore.collection("comunidades")
-            .document(comunidadId)
-            .set(datosComunidad)
-            .addOnSuccessListener {
-                // Una vez creada la comunidad, crear el usuario
-                crearUsuarioEnFirestore(userId, comunidadId)
-            }
-            .addOnFailureListener { exception ->
-                _estadoRegistro.value = EstadoRegistro.Error("Error al crear la comunidad")
-                _mensajeError.value = "No se pudo crear la comunidad"
-            }
-    }
-
-    private fun crearUsuarioEnFirestore(userId: String, comunidadId: String) {
-        val datosUsuario = hashMapOf(
-            "id" to userId,
-            "nombre" to _nombre.value,
-            "email" to _email.value,
-            "telefono" to _telefono.value,
-            "foto_perfil" to "",
-            "fecha_registro" to Date(),
-            "comunidad_id" to comunidadId,
-            "es_admin" to _esAdministrador.value
-        )
-
-        firestore.collection("usuarios")
-            .document(userId)
-            .set(datosUsuario)
-            .addOnSuccessListener {
-                _estadoRegistro.value = EstadoRegistro.Exito
-                _mostrarDialogoExito.value = true
-            }
-            .addOnFailureListener { exception ->
-                // Si falla, intentar eliminar el usuario de Auth
-                auth.currentUser?.delete()
-
-                _estadoRegistro.value = EstadoRegistro.Error("Error al guardar los datos del usuario")
-                _mensajeError.value = "No se pudieron guardar los datos del usuario"
-            }
-    }
-
-    private fun generarIdComunidad(): String {
-        // Generar ID único para la comunidad
-        val timestamp = System.currentTimeMillis()
-        val random = (1000..9999).random()
-        return "Cs${timestamp}${random}a"
-    }
-
+    /**
+     * Reinicia el estado del registro
+     */
     fun reiniciarEstado() {
         _estadoRegistro.value = EstadoRegistro.Inicial
         _mensajeError.value = null
     }
 
+    /**
+     * Limpia todos los campos del formulario
+     */
+    private fun limpiarFormulario() {
+        _nombre.value = ""
+        _email.value = ""
+        _contrasenna.value = ""
+        _confirmarContrasenna.value = ""
+        _telefono.value = ""
+        _idComunidad.value = ""
+        _esAdministrador.value = false
+    }
+
+    /**
+     * Oculta el diálogo de éxito
+     */
     fun ocultarDialogoExito() {
         _mostrarDialogoExito.value = false
     }

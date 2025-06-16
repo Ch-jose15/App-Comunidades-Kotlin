@@ -10,6 +10,8 @@ import com.example.appcomunidades.pantallas.PantallaIniciarSesion
 import com.example.appcomunidades.pantallas.PantallaInicio
 import com.example.appcomunidades.pantallas.PantallaRegistro
 import com.example.appcomunidades.pantallas.PantallaPrincipal
+import com.example.appcomunidades.pantallas.PantallaCrearAnuncio
+import com.example.appcomunidades.pantallas.PantallaCrearIncidencia
 
 /* RUTAS DE NAVEGACIÓN */
 
@@ -23,7 +25,9 @@ enum class RutasNavegacion {
     Registro,
     RecuperarContrasenna,
     Principal,
-    PantallaPrincipal;
+    PantallaPrincipal,
+    CrearAnuncio,
+    CrearIncidencia;
 
     companion object {
         fun fromRoute(ruta: String?): RutasNavegacion =
@@ -34,6 +38,8 @@ enum class RutasNavegacion {
                 RecuperarContrasenna.name -> RecuperarContrasenna
                 Principal.name -> Principal
                 PantallaPrincipal.name -> PantallaPrincipal
+                CrearAnuncio.name -> CrearAnuncio
+                CrearIncidencia.name -> CrearIncidencia
                 null -> Inicio
                 else -> throw IllegalArgumentException("Ruta $ruta no reconocida" )
             }
@@ -79,6 +85,21 @@ class AccionesDeNavegacion(private val navController : NavHostController) {
             // Limpiar para que el usuario no pueda volver a las pantallas de autenticación
             popUpTo(RutasNavegacion.Inicio.name) { inclusive = true }
         }
+    }
+
+    /* Navegación a la pantalla de crear anuncio */
+    val navegarACrearAnuncio: () -> Unit = {
+        navController.navigate(RutasNavegacion.CrearAnuncio.name)
+    }
+
+    /* Navegación de vuelta a la pantalla principal desde crear anuncio */
+    val volverAPrincipalDesdeCrearAnuncio: () -> Unit = {
+        navController.popBackStack(RutasNavegacion.Principal.name, false)
+    }
+
+    /* Navegación a la pantalla de crear incidencia */
+    val navegarACrearIncidencia: () -> Unit = {  // ← NUEVA FUNCIÓN
+        navController.navigate(RutasNavegacion.CrearIncidencia.name)
     }
 }
 
@@ -131,7 +152,26 @@ fun NavegacionAppComunidaeds(
 
         /* Definición de Principal */
         composable(RutasNavegacion.Principal.name) {
-            PantallaPrincipal()
+            PantallaPrincipal(
+                onCrearAnuncioClick = accionesNavegacion.navegarACrearAnuncio,
+                onCrearIncidenciaClick = accionesNavegacion.navegarACrearIncidencia
+            )
+        }
+
+        /* Definición de Crear Anuncio */
+        composable(RutasNavegacion.CrearAnuncio.name) {
+            PantallaCrearAnuncio(
+                onVolverClick = accionesNavegacion.volver,
+                onAnuncioCreado = accionesNavegacion.volverAPrincipalDesdeCrearAnuncio
+            )
+        }
+
+        /* Definición de Crear Incidencia */
+        composable(RutasNavegacion.CrearIncidencia.name) {
+            PantallaCrearIncidencia(
+                onVolverClick = accionesNavegacion.volver,
+                onIncidenciaCreada = accionesNavegacion.volver
+            )
         }
     }
 }

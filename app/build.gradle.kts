@@ -20,6 +20,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            isDebuggable = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -37,18 +40,22 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
-    // Firebase BOM - mantiene las versiones compatibles
+    // Firebase BOM - asegura compatibilidad entre versiones
     implementation(platform(libs.firebase.bom))
 
-    // Firebase services
-    implementation(libs.firebase.database.ktx)
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Firebase Firestore
     implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.auth.ktx) // ← Nueva dependencia agregada
-    implementation(libs.firebase.storage.ktx) // ← Nueva dependencia agregada
+
+    // Firebase Realtime Database (si lo necesitas)
+    implementation(libs.firebase.database.ktx)
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
@@ -67,7 +74,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // ViewModel Compose
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Hilt para inyección de dependencias (opcional pero recomendado)
+    // implementation("com.google.dagger:hilt-android:2.48")
+    // kapt("com.google.dagger:hilt-compiler:2.48")
+    // implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     // Testing
     testImplementation(libs.junit)
@@ -75,6 +90,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
