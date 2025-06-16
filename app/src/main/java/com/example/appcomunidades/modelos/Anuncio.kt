@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 /**
  * Modelo de datos para los anuncios de la comunidad
  */
+@Suppress("UNCHECKED_CAST")
 data class Anuncio(
     val id: String = "",
     val titulo: String = "",
@@ -16,8 +17,6 @@ data class Anuncio(
     val usuario_id: String = "",
     val comunidad_id: String = "",
     val lectores: List<String> = emptyList(),
-
-    // Campos adicionales para la UI
     val nombre_autor: String = "",
     val fecha_formateada: String = ""
 ) {

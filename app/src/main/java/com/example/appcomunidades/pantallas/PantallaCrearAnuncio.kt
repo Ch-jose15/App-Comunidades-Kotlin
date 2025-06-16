@@ -1,7 +1,5 @@
 package com.example.appcomunidades.pantallas
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -31,9 +29,6 @@ import com.example.appcomunidades.viewmodels.CrearAnuncioViewModel
 import com.example.appcomunidades.viewmodels.EstadoCrearAnuncio
 import kotlinx.coroutines.launch
 
-/* COMPONENTES REUTILIZABLES PARA CREAR ANUNCIO */
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampoTextoAnuncio(
     valor: String,

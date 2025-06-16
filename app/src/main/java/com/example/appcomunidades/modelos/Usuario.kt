@@ -4,16 +4,15 @@ import com.google.firebase.Timestamp
 
 /**
  * Clase de datos que representa un usuario en la aplicación
- * Corresponde a la colección 'usuarios' en Firestore
  */
 data class Usuario(
-    val id: String = "", // UID de Firebase Authentication, ejemplo: Us0000001a
+    val id: String = "",
     val nombre: String = "",
     val email: String = "",
     val telefono: String = "",
-    val foto_perfil: String = "", // URL de la imagen
+    val foto_perfil: String = "",
     val fecha_registro: Timestamp = Timestamp.now(),
-    val comunidad_id: String = "", // Referencia a la comunidad (opcional)
+    val comunidad_id: String = "",
     val es_admin: Boolean = false
 ) {
     /**

@@ -34,8 +34,6 @@ import com.example.appcomunidades.viewmodels.RegistroViewModel
 import com.example.appcomunidades.viewmodels.EstadoRegistro
 import kotlinx.coroutines.launch
 
-/* COMPONENTES REUTILIZABLES ACTUALIZADOS */
-
 @Composable
 fun FotoPerfil(
     modifier: Modifier = Modifier,
@@ -411,8 +409,6 @@ fun DialogoError(
     }
 }
 
-/* PANTALLA DE REGISTRO MODERNA CON VIEWMODEL */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaRegistro(
@@ -478,10 +474,9 @@ fun PantallaRegistro(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Logo y cabecera
                 Spacer(modifier = Modifier.height(16.dp))
                 FotoPerfil(onClick = {
-                    // Lógica para seleccionar foto (implementar más tarde)
+                    //No aprobada para la demo
                 })
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -575,7 +570,6 @@ fun PantallaRegistro(
                             alCambiar = viewModel::actualizarEsAdministrador
                         )
 
-                        // Campo ID Comunidad con animación
                         AnimatedVisibility(
                             visible = !esAdministrador,
                             enter = expandVertically() + fadeIn(),
@@ -603,7 +597,6 @@ fun PantallaRegistro(
                             }
                         }
 
-                        // Nota para administradores
                         AnimatedVisibility(
                             visible = esAdministrador,
                             enter = expandVertically() + fadeIn(),

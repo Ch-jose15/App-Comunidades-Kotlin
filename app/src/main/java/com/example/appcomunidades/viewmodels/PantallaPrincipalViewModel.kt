@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel SIMPLIFICADO para la pantalla principal
- * Maneja tanto anuncios como incidencias de forma simple
+ * ViewModel para la pantalla principal
+ * Maneja tanto anuncios como incidencias
  */
 class PantallaPrincipalViewModel : ViewModel() {
 

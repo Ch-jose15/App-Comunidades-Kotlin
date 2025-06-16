@@ -33,8 +33,6 @@ import com.example.appcomunidades.viewmodels.InicioSesionViewModel
 import com.example.appcomunidades.viewmodels.EstadoInicioSesion
 import kotlinx.coroutines.launch
 
-/* COMPONENTES MODERNIZADOS PARA INICIO DE SESIÓN */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampoTextoInicioSesion(
@@ -197,8 +195,6 @@ fun TituloHabitatDigital(
         )
     }
 }
-
-/* PANTALLA DE INICIO DE SESIÓN MODERNIZADA CON VIEWMODEL */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -477,7 +473,6 @@ fun PantallaIniciarSesionPreview() {
             modifier = Modifier.fillMaxSize(),
             color = ColorFondo
         ) {
-            // Preview sin ViewModel para evitar errores
             PantallaIniciarSesionSinViewModel()
         }
     }

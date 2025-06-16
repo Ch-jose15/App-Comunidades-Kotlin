@@ -28,8 +28,6 @@ import com.example.appcomunidades.viewmodels.EstadoCrearIncidencia
 import com.example.appcomunidades.modelos.Incidencia
 import kotlinx.coroutines.launch
 
-/* COMPONENTES ESPECÍFICOS PARA INCIDENCIAS */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampoTextoIncidencia(
@@ -53,7 +51,7 @@ fun CampoTextoIncidencia(
                 Icon(
                     imageVector = icono,
                     contentDescription = etiqueta,
-                    tint = Color(0xFF253745) // ColorPrimarioVariante
+                    tint = Color(0xFF253745)
                 )
             },
             trailingIcon = {
@@ -61,7 +59,7 @@ fun CampoTextoIncidencia(
                     Text(
                         text = contadorCaracteres,
                         fontSize = 12.sp,
-                        color = Color(0xFF9BA8AB) // ColorSecundario
+                        color = Color(0xFF9BA8AB)
                     )
                 }
             },

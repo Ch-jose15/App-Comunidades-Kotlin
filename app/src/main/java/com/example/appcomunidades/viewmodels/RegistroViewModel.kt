@@ -114,7 +114,6 @@ class RegistroViewModel : ViewModel() {
 
     fun actualizarEsAdministrador(esAdmin: Boolean) {
         _esAdministrador.value = esAdmin
-        // Limpiar ID de comunidad cuando se cambia a administrador
         if (esAdmin) {
             _idComunidad.value = ""
         }

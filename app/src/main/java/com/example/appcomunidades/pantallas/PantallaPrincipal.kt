@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -53,8 +52,6 @@ data class AnuncioEjemplo(
     val comunidadId: String = ""
 )
 
-/* COMPONENTES ESPECÍFICOS DE LA PANTALLA PRINCIPAL */
-
 @Composable
 fun BarraSuperior(
     onPerfilClick: () -> Unit = {},
@@ -68,10 +65,8 @@ fun BarraSuperior(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Logo lado izquierdo
         LogoHorizontal()
 
-        // Avatar del usuario lado derecho
         if (datosUsuario != null) {
             IconButton(
                 onClick = onPerfilClick,
@@ -83,7 +78,7 @@ fun BarraSuperior(
                 )
             }
         } else {
-            // Fallback al icono por defecto
+
             IconButton(
                 onClick = onPerfilClick,
                 modifier = Modifier
@@ -110,7 +105,6 @@ fun LogoHorizontal(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Placeholder para logo - reemplazar con tu imagen
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -252,7 +246,6 @@ fun TarjetaAnuncio(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Fila superior: Título y etiqueta de urgente
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -277,7 +270,6 @@ fun TarjetaAnuncio(
                     )
                 }
 
-                // Etiqueta de urgente
                 if (anuncio.esUrgente) {
                     Card(
                         shape = RoundedCornerShape(8.dp),
@@ -298,13 +290,11 @@ fun TarjetaAnuncio(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Fila inferior: Autor, fecha, categoría y comunidad
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Columna izquierda: Autor y comunidad
                 Column {
                     Text(
                         text = "Por: ${anuncio.autor}",
@@ -317,7 +307,6 @@ fun TarjetaAnuncio(
                         fontSize = 11.sp,
                         color = Color(0xFF9BA8AB)
                     )
-                    // Mostrar comunidad si no está vacía
                     if (anuncio.comunidadId.isNotEmpty()) {
                         Text(
                             text = "📍 ${anuncio.comunidadId}",
@@ -328,7 +317,6 @@ fun TarjetaAnuncio(
                     }
                 }
 
-                // Columna derecha: Categoría (si está disponible)
                 if (anuncio.categoria.isNotEmpty()) {
                     Card(
                         shape = RoundedCornerShape(6.dp),
@@ -372,7 +360,6 @@ fun TarjetaIncidenciaSimple(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Fila superior: Título y prioridad
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -397,7 +384,6 @@ fun TarjetaIncidenciaSimple(
                     )
                 }
 
-                // Etiqueta de prioridad
                 Card(
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
@@ -424,13 +410,11 @@ fun TarjetaIncidenciaSimple(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Fila inferior: Autor, fecha, categoría y estado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Columna izquierda: Autor y comunidad
                 Column {
                     Text(
                         text = "Por: ${incidencia.nombre_autor}",
@@ -453,7 +437,6 @@ fun TarjetaIncidenciaSimple(
                     }
                 }
 
-                // Columna derecha: Estado
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -664,7 +647,6 @@ fun PantallaPrincipal(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Contenido según la sección
             AnimatedContent(
                 targetState = seccionActual,
                 transitionSpec = {
@@ -911,7 +893,7 @@ fun PantallaPrincipal(
 fun PantallaPrincipalPreview() {
     TemaAppComunidades {
         PantallaPrincipal(
-            onCerrarSesion = { /* Simular cerrar sesión */ }
+            onCerrarSesion = { }
         )
     }
 }

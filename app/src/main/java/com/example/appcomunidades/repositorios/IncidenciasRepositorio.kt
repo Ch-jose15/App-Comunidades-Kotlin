@@ -12,7 +12,6 @@ import java.util.UUID
 
 /**
  * Repositorio para manejo de incidencias
- * Basado en el AnunciosRepositorio pero adaptado para incidencias
  */
 @Singleton
 class IncidenciasRepositorio @Inject constructor() {

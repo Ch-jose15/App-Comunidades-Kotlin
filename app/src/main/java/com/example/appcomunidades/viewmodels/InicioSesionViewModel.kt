@@ -93,7 +93,6 @@ class InicioSesionViewModel : ViewModel() {
             when (resultado) {
                 is ResultadoAuth.Exito -> {
                     _estadoInicioSesion.value = EstadoInicioSesion.Exito
-                    // TODO: Guardar credenciales si recordarme está activado
                     limpiarFormulario()
                 }
                 is ResultadoAuth.Error -> {

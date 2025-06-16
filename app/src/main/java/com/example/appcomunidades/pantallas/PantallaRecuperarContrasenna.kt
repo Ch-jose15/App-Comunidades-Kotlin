@@ -30,7 +30,7 @@ import com.example.appcomunidades.viewmodels.RecuperarContrasennaViewModel
 import com.example.appcomunidades.viewmodels.EstadoRecuperacion
 import kotlinx.coroutines.launch
 
-/* COMPONENTES ESPECÍFICOS PARA RECUPERAR CONTRASEÑA */
+/* RECUPERAR CONTRASEÑA */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

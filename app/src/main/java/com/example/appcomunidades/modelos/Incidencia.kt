@@ -10,15 +10,13 @@ data class Incidencia(
     val titulo: String = "",
     val descripcion: String = "",
     val categoria: String = "",
-    val prioridad: String = "", // baja, media, alta
-    val estado: String = "", // pendiente, en proceso, resuelta
+    val prioridad: String = "",
+    val estado: String = "",
     val fecha_creacion: Timestamp = Timestamp.now(),
     val fecha_actualizacion: Timestamp = Timestamp.now(),
     val usuario_id: String = "",
     val comunidad_id: String = "",
     val imagenes: List<String> = emptyList(),
-
-    // Campos calculados/helper para UI
     val nombre_autor: String = "",
     val fecha_formateada: String = "",
     val color_prioridad: Long = 0xFF9BA8AB,
@@ -84,10 +82,10 @@ data class Incidencia(
          */
         fun obtenerColorPrioridad(prioridad: String): Long {
             return when (prioridad.lowercase()) {
-                "alta" -> 0xFF11212D // Rojo oscuro
-                "media" -> 0xFF253745 // Naranja oscuro
-                "baja" -> 0xFF4A5C6A // Verde oscuro
-                else -> 0xFF9BA8AB // Gris por defecto
+                "alta" -> 0xFF11212D
+                "media" -> 0xFF253745
+                "baja" -> 0xFF4A5C6A
+                else -> 0xFF9BA8AB
             }
         }
 
@@ -96,9 +94,9 @@ data class Incidencia(
          */
         fun obtenerColorEstado(estado: String): Long {
             return when (estado.lowercase()) {
-                "resuelta" -> 0xFF4A5C6A // Verde
-                "en proceso" -> 0xFF253745 // Naranja
-                "pendiente" -> 0xFF9BA8AB // Gris
+                "resuelta" -> 0xFF4A5C6A
+                "en proceso" -> 0xFF253745
+                "pendiente" -> 0xFF9BA8AB
                 else -> 0xFF9BA8AB
             }
         }
@@ -157,7 +155,7 @@ data class Incidencia(
                 descripcion = descripcion.trim(),
                 categoria = categoria,
                 prioridad = prioridad,
-                estado = "pendiente", // Estado inicial por defecto
+                estado = "pendiente",
                 fecha_creacion = ahora,
                 fecha_actualizacion = ahora,
                 usuario_id = usuarioId,

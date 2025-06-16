@@ -25,7 +25,6 @@ import com.example.appcomunidades.ui.theme.*
 fun LogoApp(
     modificador: Modifier = Modifier
 ) {
-    // Placeholder para el logo - reemplazar con tu imagen real
     Image(
          painter = painterResource(id = R.drawable.logo_app),
          contentDescription = "Logo Habitat Digital",
@@ -143,8 +142,6 @@ fun ContenedorBotones(
     }
 }
 
-/* PANTALLA DE INICIO SIMPLIFICADA */
-
 @Composable
 fun PantallaInicio(
     onIniciarSesionClick: () -> Unit = {},
@@ -173,12 +170,9 @@ fun PantallaInicio(
         ) {
             Spacer(modifier = Modifier.weight(0.5f))
 
-            // Logo de la aplicación
             LogoApp()
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            //Spacer(modifier = Modifier.weight(1f))
 
             // Contenedor con botones
             ContenedorBotones(
@@ -189,7 +183,6 @@ fun PantallaInicio(
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        // Copyright en la parte inferior
         CopyrightTexto(
             modificador = Modifier
                 .align(Alignment.BottomCenter)

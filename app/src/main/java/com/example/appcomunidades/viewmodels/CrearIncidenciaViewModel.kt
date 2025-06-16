@@ -20,7 +20,6 @@ sealed class EstadoCrearIncidencia {
 
 /**
  * ViewModel para crear incidencias
- * Basado en CrearAnuncioViewModel pero adaptado para incidencias
  */
 class CrearIncidenciaViewModel : ViewModel() {
 

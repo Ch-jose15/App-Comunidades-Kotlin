@@ -16,9 +16,6 @@ class AnunciosRepositorio @Inject constructor() {
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    /**
-     * Crea un anuncio de forma SÚPER SIMPLE
-     */
     suspend fun crearAnuncio(
         titulo: String,
         contenido: String,
@@ -39,14 +36,12 @@ class AnunciosRepositorio @Inject constructor() {
             val nombre = usuarioActual.displayName ?: "Usuario"
             val uid = usuarioActual.uid
 
-            // Generar ID simple con UUID + timestamp
             val timestamp = System.currentTimeMillis()
             val anuncioId = "anuncio_${timestamp}_${UUID.randomUUID().toString().take(8)}"
 
             println("DEBUG: ID generado: $anuncioId")
             println("DEBUG: Usuario: $nombre ($email)")
 
-            // Crear anuncio simple
             val anuncio = Anuncio(
                 id = anuncioId,
                 titulo = titulo.trim(),
@@ -54,14 +49,13 @@ class AnunciosRepositorio @Inject constructor() {
                 categoria = categoria,
                 es_urgente = esUrgente,
                 fecha_publicacion = Timestamp.now(),
-                usuario_id = uid, // Usar directamente el UID de Firebase Auth
-                comunidad_id = "comunidad_general", // Comunidad fija para simplicidad
+                usuario_id = uid,
+                comunidad_id = "comunidad_general",
                 lectores = emptyList(),
                 nombre_autor = nombre,
                 fecha_formateada = "Ahora"
             )
 
-            // Datos para Firestore (sin validaciones complejas)
             val datosAnuncio = mapOf(
                 "id" to anuncioId,
                 "titulo" to titulo.trim(),
@@ -93,16 +87,13 @@ class AnunciosRepositorio @Inject constructor() {
         }
     }
 
-    /**
-     * Obtiene todos los anuncios (sin filtros complejos)
-     */
     suspend fun obtenerTodosLosAnuncios(): ResultadoOperacion<List<Anuncio>> {
         return try {
             println("DEBUG: Obteniendo todos los anuncios...")
 
             val snapshot = firestore.collection("anuncios")
                 .orderBy("fecha_publicacion", Query.Direction.DESCENDING)
-                .limit(50) // Máximo 50 anuncios
+                .limit(50)
                 .get()
                 .await()
 
@@ -142,9 +133,7 @@ class AnunciosRepositorio @Inject constructor() {
         }
     }
 
-    /**
-     * Elimina un anuncio (solo si es el autor)
-     */
+    //Elimina un anuncio (solo si es el autor)
     suspend fun eliminarAnuncio(anuncioId: String): ResultadoOperacion<Boolean> {
         return try {
             val usuarioActual = auth.currentUser
@@ -182,9 +171,6 @@ class AnunciosRepositorio @Inject constructor() {
         }
     }
 
-    /**
-     * Función auxiliar para formatear fechas
-     */
     private fun formatearFecha(timestamp: Timestamp?): String {
         if (timestamp == null) return "Fecha desconocida"
 
@@ -214,9 +200,6 @@ class AnunciosRepositorio @Inject constructor() {
     }
 }
 
-/**
- * Resultado simplificado
- */
 sealed class ResultadoOperacion<out T> {
     data class Exito<T>(val datos: T) : ResultadoOperacion<T>()
     data class Error(val mensaje: String) : ResultadoOperacion<Nothing>()

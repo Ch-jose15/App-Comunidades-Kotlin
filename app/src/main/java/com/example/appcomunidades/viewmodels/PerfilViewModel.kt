@@ -114,7 +114,7 @@ class PerfilViewModel : ViewModel() {
         return try {
             println("DEBUG: Buscando usuario en Firestore con email: $email")
 
-            // ESTRATEGIA 1: Buscar por email normalizado
+            // Buscar por email normalizado
             val emailNormalizado = email.lowercase().trim()
 
             val snapshot = firestore.collection("usuarios")
@@ -137,7 +137,7 @@ class PerfilViewModel : ViewModel() {
 
             println("DEBUG: No encontrado por email, intentando por UID...")
 
-            // ESTRATEGIA 2: Buscar por UID del usuario autenticado
+            // Buscar por UID del usuario autenticado
             val uid = auth.currentUser?.uid ?: return null
 
             // Buscar documento que tenga referencia al UID o donde el ID del documento sea el UID
@@ -160,7 +160,7 @@ class PerfilViewModel : ViewModel() {
 
             println("DEBUG: Intentando buscar por coincidencia parcial de email...")
 
-            // ESTRATEGIA 3: Obtener TODOS los usuarios y buscar coincidencia
+            // Obtener TODOS los usuarios y buscar coincidencia
             val todosUsuarios = firestore.collection("usuarios")
                 .get()
                 .await()
@@ -307,7 +307,6 @@ class PerfilViewModel : ViewModel() {
                     println("DEBUG: ❌ PROBLEMA: Usuario NO encontrado en Firestore")
                     println("DEBUG: Email buscado: $email")
 
-                    // Mostrar TODOS los usuarios en Firestore para comparar
                     val todosUsuarios = firestore.collection("usuarios")
                         .get()
                         .await()

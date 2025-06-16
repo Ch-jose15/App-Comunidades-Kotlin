@@ -7,9 +7,6 @@ import com.example.appcomunidades.repositorios.ResultadoOperacion
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-/**
- * Estados simplificados
- */
 sealed class EstadoCrearAnuncio {
     object Inicial : EstadoCrearAnuncio()
     object Cargando : EstadoCrearAnuncio()

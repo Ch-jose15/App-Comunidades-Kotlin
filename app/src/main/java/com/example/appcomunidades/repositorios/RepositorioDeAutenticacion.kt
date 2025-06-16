@@ -34,8 +34,8 @@ class AuthRepositorio @Inject constructor() {
             println("DEBUG: === INICIANDO REGISTRO ===")
             println("DEBUG: Email: $email, EsAdmin: $esAdmin")
 
-            // PASO 1: Crear usuario en Firebase Authentication
-            println("DEBUG: Paso 1 - Creando usuario en Firebase Auth...")
+            // Crear usuario en Firebase Authentication
+            println("DEBUG: Creando usuario en Firebase Auth...")
             val resultado = auth.createUserWithEmailAndPassword(email, contrasenna).await()
             val firebaseUser = resultado.user
 
@@ -43,14 +43,14 @@ class AuthRepositorio @Inject constructor() {
                 val firebaseUid = firebaseUser.uid
                 println("DEBUG: Usuario creado en Auth exitosamente. UID: $firebaseUid")
 
-                // PASO 2: Generar ID único para el usuario
-                println("DEBUG: Paso 2 - Obteniendo contador de usuarios...")
+                // Generar ID único para el usuario
+                println("DEBUG: Obteniendo contador de usuarios...")
                 val contadorUsuarios = obtenerContadorUsuarios()
                 val userId = Usuario.generarId(contadorUsuarios + 1)
                 println("DEBUG: ID generado: $userId")
 
-                // PASO 3: Determinar ID de comunidad
-                println("DEBUG: Paso 3 - Determinando comunidad...")
+                // Determinar ID de comunidad
+                println("DEBUG: Determinando comunidad...")
                 val comunidadFinal = if (esAdmin && comunidadId.isEmpty()) {
                     println("DEBUG: Es admin sin comunidad, creando nueva...")
                     crearNuevaComunidad(nombre)
@@ -68,8 +68,8 @@ class AuthRepositorio @Inject constructor() {
                 }
                 println("DEBUG: Comunidad final: $comunidadFinal")
 
-                // PASO 4: Crear objeto Usuario
-                println("DEBUG: Paso 4 - Creando objeto Usuario...")
+                // Crear objeto Usuario
+                println("DEBUG: Creando objeto Usuario...")
                 val usuario = Usuario(
                     id = userId,
                     nombre = nombre,
@@ -81,8 +81,8 @@ class AuthRepositorio @Inject constructor() {
                     es_admin = esAdmin
                 )
 
-                // PASO 5: Guardar usuario en Firestore
-                println("DEBUG: Paso 5 - Guardando usuario en Firestore...")
+                // Guardar usuario en Firestore
+                println("DEBUG: Guardando usuario en Firestore...")
                 try {
                     firestore.collection("usuarios")
                         .document(userId)
@@ -96,8 +96,8 @@ class AuthRepositorio @Inject constructor() {
                     return ResultadoAuth.Error("Error al guardar datos del usuario: ${e.message}")
                 }
 
-                // PASO 6: Crear mapeo (OPCIONAL - puede fallar sin afectar el registro)
-                println("DEBUG: Paso 6 - Creando mapeo de usuarios...")
+                // Crear mapeo (OPCIONAL - puede fallar sin afectar el registro)
+                println("DEBUG: Creando mapeo de usuarios...")
                 try {
                     firestore.collection("mapeo_usuarios")
                         .document(firebaseUid)
@@ -109,11 +109,10 @@ class AuthRepositorio @Inject constructor() {
                     println("DEBUG: Mapeo creado exitosamente")
                 } catch (e: Exception) {
                     println("DEBUG: ADVERTENCIA en Paso 6 - ${e.message} (no crítico)")
-                    // No retornar error aquí, el mapeo es opcional
                 }
 
-                // PASO 7: Actualizar contador (OPCIONAL - puede fallar sin afectar el registro)
-                println("DEBUG: Paso 7 - Actualizando contador...")
+                // Actualizar contador (OPCIONAL - puede fallar sin afectar el registro)
+                println("DEBUG: Actualizando contador...")
                 try {
                     actualizarContadorUsuarios(contadorUsuarios + 1)
                     println("DEBUG: Contador actualizado exitosamente")
@@ -345,9 +344,6 @@ class AuthRepositorio @Inject constructor() {
     }
 }
 
-/**
- * Clase sellada para representar el resultado de operaciones de autenticación
- */
 sealed class ResultadoAuth {
     data class Exito(val usuario: Usuario) : ResultadoAuth()
     data class Error(val mensaje: String) : ResultadoAuth()
